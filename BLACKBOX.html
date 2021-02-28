@@ -29,7 +29,7 @@
                                         Str
                                     </a>
                                 </li>
-                                                            <li class="sub-item current">
+                                                            <li class="sub-item ">
                                     <a href="https://innmind.github.io/Immutable/REGEXP.html">
                                         RegExp
                                     </a>
@@ -40,7 +40,7 @@
                         Types
                     </a>
                             </li>
-                    <li>
+                    <li class="current">
                                     <a href="https://innmind.github.io/Immutable/BLACKBOX.html">
                         Blackbox
                     </a>
@@ -50,21 +50,36 @@
                         Philosophy
                     </a>
                             </li>
-                </ul></aside><main><h1 id="regexp"><a href="#regexp" class="anchor">#</a><code>RegExp</code></h1>
-<p>This class is here to help make sure that a string is a regular expression so you can safely type against this class.</p>
-<h2 id="of"><a href="#of" class="anchor">#</a><code>::of()</code></h2>
-<p>This is the named cosntructor for this class.</p>
-<pre><code class="language-php">RegExp::of('/foo/') instanceof RegExp; // true
-RegExp::of('foo'); // throws Innmind\Immutable\Exception\DomainException</code></pre>
-<h2 id="matches"><a href="#matches" class="anchor">#</a><code>->matches()</code></h2>
-<p>Both examples do the same thing.</p>
-<pre><code class="language-php">RegExp::of('/^a/')->matches(Str::of('abcdef'));
-Str::of('abcdef')->matches('/^a/');</code></pre>
-<h2 id="capture"><a href="#capture" class="anchor">#</a><code>->capture()</code></h2>
-<p>Both examples do the same thing.</p>
-<pre><code class="language-php">RegExp::of('@^(?:http://)?(?P<host>[^/]+)@i')->capture(Str::of('http://www.php.net/index.html'));
-Str::of('http://www.php.net/index.html')->capture('@^(?:http://)?(?P<host>[^/]+)@i');</code></pre>
-<h2 id="tostring"><a href="#tostring" class="anchor">#</a><code>->toString()</code></h2>
-<p>Return the string representation of the regular expression.</p>
-<pre><code class="language-php">RegExp::of('/foo/')->toString(); // '/foo/'</code></pre></main><footer><a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
+                </ul></aside><main><h1 id="innmindblackbox-sets"><a href="#innmindblackbox-sets" class="anchor">#</a><code>innmind/black-box</code> sets</h1>
+<p>This package provides additional sets for <a href="https://packagist.org/packages/innmind/black-box"><code>innmind/black-box</code></a> so you can more easily generate: <code>Map</code>s, <code>Set</code>s and <code>Sequence</code>s.</p>
+<p>For the 3 <code>::of()</code> method you can as last parameter an instance of <code>Innmind\BlackBox\Set\Intergers</code> to specify the range of elements to generate. By default it's between <code>0</code> and <code>100</code>, depending on the values you generate you may to lower the upper bound to reduce the memory footprint and speed up your tests.</p>
+<h2 id="map"><a href="#map" class="anchor">#</a><code>Map</code></h2>
+<pre><code class="language-php">use Fixtures\Innmind\Immutable\Map;
+use Innmind\BlackBox\Set;
+
+/** @var Innmind\Immutable\Map<int, string> */
+$set = Map::of(
+    'int',
+    'string',
+    Set\Integers::any(),
+    Set\Strings::any(),
+);</code></pre>
+<h2 id="set"><a href="#set" class="anchor">#</a><code>Set</code></h2>
+<pre><code class="language-php">use Fixtures\Innmind\Immutable\Set;
+use Innmind\BlackBox\Set;
+
+/** @var Innmind\Immutable\Set<string> */
+$set = Set::of(
+    'string',
+    Set\Strings::any(),
+);</code></pre>
+<h2 id="sequence"><a href="#sequence" class="anchor">#</a><code>Sequence</code></h2>
+<pre><code class="language-php">use Fixtures\Innmind\Immutable\Sequence;
+use Innmind\BlackBox\Sequence;
+
+/** @var Innmind\Immutable\Sequence<string> */
+$set = Sequence::of(
+    'string',
+    Sequence\Strings::any(),
+);</code></pre></main><footer><a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
     </footer></body></html>
