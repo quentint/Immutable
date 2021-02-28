@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html><head><title>innmind/immutable</title><link rel="stylesheet" href="https://innmind.github.io/immutable/static/main.css"/><link rel="stylesheet" href="https://innmind.github.io/immutable/static/styles/default.css"/><link rel="stylesheet" href="https://innmind.github.io/immutable/static/styles/atom-one-dark.css"/><script src="https://innmind.github.io/immutable/static/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body>
+    <header><a href="https://innmind.github.io/immutable/"><code>immutable</code></a>
+    </header><aside><ul><li>
+                                    <a href="https://innmind.github.io/immutable/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details open><summary>
+                                                            Structures
+                                                    </summary><ul><li class="sub-item ">
+                                    <a href="https://innmind.github.io/immutable/SEQUENCE.html">
+                                        Sequence
+                                    </a>
+                                </li>
+                                                            <li class="sub-item current">
+                                    <a href="https://innmind.github.io/immutable/SET.html">
+                                        Set
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/immutable/MAP.html">
+                                        Map
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/immutable/STR.html">
+                                        Str
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/immutable/REGEXP.html">
+                                        RegExp
+                                    </a>
+                                </li>
+                                                    </ul></details></li>
+                    <li>
+                                    <a href="https://innmind.github.io/immutable/TYPES.html">
+                        Types
+                    </a>
+                            </li>
+                    <li>
+                                    <a href="https://innmind.github.io/immutable/PHILOSOPHY.html">
+                        Philosophy
+                    </a>
+                            </li>
+                </ul></aside><main><h1 id="set"><a href="#set" class="anchor">#</a><code>Set</code></h1>
+<p>A set is an unordered list of unique elements.</p>
+<p>A sequence is always typed in order to be sure it only contains elements of the type you specified. If you try to add an element of a different type it will throw an error.</p>
+<h2 id="of"><a href="#of" class="anchor">#</a><code>::of()</code></h2>
+<p>The <code>of</code> static method allows you to create a new set of the given <a href="types.html">type</a>:</p>
+<pre><code class="language-php">use Innmind\Immutable\Set;
+
+/** @var Set<int> */
+$set = Set::of('int');</code></pre>
+<p>This named constructor also allows you to directly add elements when initialising the set:</p>
+<pre><code class="language-php">Set::of('int', 1, 2, 3, $etc);</code></pre>
+<h2 id="defer"><a href="#defer" class="anchor">#</a><code>::defer()</code></h2>
+<p>This named constructor is for advanced use cases where you want the data of your set to be loaded upon use only and not initialisation.</p>
+<p>An example for such a use case is a set of log lines coming from a file:</p>
+<pre><code class="language-php">$set = Set::defer('string', (function() {
+    yield from readSomeFile('apache.log');
+})());</code></pre>
+<p>The method as always ask the type of the elements and a generator that will provide the elements. Once the elements are loaded they are kept in memory so you can run multiple operations on it without loading the file twice.</p>
+<p><strong>Important</strong>: beware of the case where the source you read the elements is not altered before the first use of the set.</p>
+<h2 id="lazy"><a href="#lazy" class="anchor">#</a><code>::lazy()</code></h2>
+<p>This is similar to <code>::defer()</code> with the exception that the elements are not kept in memory but reloaded upon each use.</p>
+<pre><code class="language-php">$set = Set::lazy('string', function() {
+    yield from readSomeFile('apache.log');
+});</code></pre>
+<p><strong>Important</strong>: since the elements are reloaded each time the immutability responsability is up to you because the source may change or if you generate objects it will generate new objects each time (so if you make strict comparison it will fail).</p>
+<h2 id="mixed"><a href="#mixed" class="anchor">#</a><code>::mixed()</code></h2>
+<p>This is a shortcut for <code>::of('mixed', ...$mixed)</code>.</p>
+<h2 id="ints"><a href="#ints" class="anchor">#</a><code>::ints()</code></h2>
+<p>This is a shortcut for <code>::of('int', int ...$ints)</code>.</p>
+<h2 id="floats"><a href="#floats" class="anchor">#</a><code>::floats()</code></h2>
+<p>This is a shortcut for <code>::of('float', float ...$floats)</code>.</p>
+<h2 id="strings"><a href="#strings" class="anchor">#</a><code>::strings()</code></h2>
+<p>This is a shortcut for <code>::of('string', string ...$strings)</code>.</p>
+<h2 id="objects"><a href="#objects" class="anchor">#</a><code>::objects()</code></h2>
+<p>This is a shortcut for <code>::of('object', object ...$objects)</code>.</p>
+<h2 id="isoftype"><a href="#isoftype" class="anchor">#</a><code>->isOfType()</code></h2>
+<p>This method is here to help you know if the set is of a certain type:</p>
+<pre><code class="language-php">$set = Set::of('stdClass');
+$set->isOfType('int'); // false
+$set->isOfType('stdClass'); // true</code></pre>
+<h2 id="type"><a href="#type" class="anchor">#</a><code>->type()</code></h2>
+<p>This returns the type you specified at initialisation.</p>
+<pre><code class="language-php">$set = Set::of('stdClass');
+$set->type(); // 'stdClass'</code></pre>
+<h2 id="invoke"><a href="#invoke" class="anchor">#</a><code>->__invoke()</code></h2>
+<p>Augment the set with a new element. If the element is already in the set nothing changes.</p>
+<pre><code class="language-php">$set = Set::ints(1);
+$set = ($set)(2)(1);
+$set->equals(Set::ints(1, 2));</code></pre>
+<h2 id="add"><a href="#add" class="anchor">#</a><code>->add()</code></h2>
+<p>This is an alias for <code>->__invoke()</code>.</p>
+<h2 id="size"><a href="#size" class="anchor">#</a><code>->size()</code></h2>
+<p>This returns the number of elements in the set.</p>
+<pre><code class="language-php">$set = Set::ints(1, 4, 6);
+$set->size(); // 3</code></pre>
+<h2 id="count"><a href="#count" class="anchor">#</a><code>->count()</code></h2>
+<p>This is an alias for <code>->size()</code>, but you can also use the PHP function <code>\count</code> if you prefer.</p>
+<pre><code class="language-php">$set = Set::ints(1, 4, 6);
+$set->count(); // 3
+\count($set); // 3</code></pre>
+<h2 id="intersect"><a href="#intersect" class="anchor">#</a><code>->intersect()</code></h2>
+<p>Create a new set with the elements that are also in the other set.</p>
+<pre><code class="language-php">$set = Set::ints(1, 2, 3)->intersect(Set::ints(2, 3, 4));
+$set->equals(Set::ints(2, 3)); // true</code></pre>
+<h2 id="contains"><a href="#contains" class="anchor">#</a><code>->contains()</code></h2>
+<p>Check if the element is present in the set.</p>
+<pre><code class="language-php">$set = Set::ints(1, 42, 3);
+$set->contains(2); // false
+$set->contains(42); // true
+$set->contains('42'); // throws \TypeError</code></pre>
+<h2 id="remove"><a href="#remove" class="anchor">#</a><code>->remove()</code></h2>
+<p>Create a new set without the specified element.</p>
+<pre><code class="language-php">$set = Set::ints(1, 2, 3);
+$set->remove(2)->equals(Set::ints(1, 3)); // true</code></pre>
+<h2 id="diff"><a href="#diff" class="anchor">#</a><code>->diff()</code></h2>
+<p>This method will return a new set containing the elements that are not present in the other set.</p>
+<pre><code class="language-php">$set = Set::ints(1, 4, 6)->diff(Set::ints(1, 3, 6));
+$set->equals(Set::ints(4)); // true</code></pre>
+<h2 id="equals"><a href="#equals" class="anchor">#</a><code>->equals()</code></h2>
+<p>Check if two sets are identical.</p>
+<pre><code class="language-php">Set::ints(1, 2)->equals(Set::ints(2, 1)); // true
+Set::ints()->equals(Set::strings()); // throws \TypeError</code></pre>
+<h2 id="filter"><a href="#filter" class="anchor">#</a><code>->filter()</code></h2>
+<p>Removes elements from the set that don't match the given predicate.</p>
+<pre><code class="language-php">$set = Set::ints(1, 2, 3, 4)->filter(fn($i) => $i % 2 === 0);
+$set->equals(Set::ints(2, 4));</code></pre>
+<h2 id="foreach"><a href="#foreach" class="anchor">#</a><code>->foreach()</code></h2>
+<p>Use this method to call a function for each element of the set. Since this method doesn't return anything it is the only place acceptable to create side effects.</p>
+<pre><code class="language-php">Set::strings('hello', 'world')->foreach(function(string $string): void {
+    echo $string.' ';
+});</code></pre>
+<h2 id="group"><a href="#group" class="anchor">#</a><code>->group()</code></h2>
+<p>This will create multiples sets with elements regrouped under the same key computed by the given function.</p>
+<pre><code class="language-php">$urls = Set::strings(
+    'http://example.com',
+    'http://example.com/foo',
+    'https://example.com',
+    'ftp://example.com',
+);
+/** @var Innmind\Immutable\Map<string, Set<string>> */
+$map = $urls->group(
+    'string',
+    fn(string $url): string => \parse_url($url)['scheme'],
+);
+$map->get('http')->equals(Set::strings('http://example.com', 'http://example.com/foo')); // true
+$map->get('https')->equals(Set::strings('https://example.com')); // true
+$map->get('ftp')->equals(Set::strings('ftp://example.com')); // true</code></pre>
+<h2 id="groupby"><a href="#groupby" class="anchor">#</a><code>->groupBy()</code></h2>
+<p>This is similar to the <code>->group()</code> method with the exception that the key type of the returned <a href="map.html"><code>Map</code></a> will be determined by the first computed key value.</p>
+<p>Since the key type is computed you cannot call <code>->groupBy()</code> on an empty set, otherwise it will throw <code>Innmind\Immutable\Exception\CannotGroupEmptyStructure</code>.</p>
+<pre><code class="language-php">$urls = Set::strings(
+    'http://example.com',
+    'http://example.com/foo',
+    'https://example.com',
+    'ftp://example.com',
+);
+/** @var Innmind\Immutable\Map<string, Set<string>> */
+$map = $urls->groupBy(fn(string $url): string => \parse_url($url)['scheme']);
+$map->get('http')->equals(Set::strings('http://example.com', 'http://example.com/foo')); // true
+$map->get('https')->equals(Set::strings('https://example.com')); // true
+$map->get('ftp')->equals(Set::strings('ftp://example.com')); // true</code></pre>
+<h2 id="map"><a href="#map" class="anchor">#</a><code>->map()</code></h2>
+<p>Create a new set of the same type with the exact same number of elements but modified by the given function.</p>
+<pre><code class="language-php">$ints = Set::ints(1, 2, 3);
+$squares = $ints->map(fn($i) => $i**2);
+$squares->equals(Set::ints(1, 4, 9)); // true</code></pre>
+<h2 id="mapto"><a href="#mapto" class="anchor">#</a><code>->mapTo()</code></h2>
+<p>This is similar to <code>->map()</code> except you can change the type of the generated set.</p>
+<pre><code class="language-php">$ints = Set::ints(1, 2, 3);
+$squares = $ints->mapTo('string', fn($i) => (string) ($i**2));
+$squares->equals(Set::strings('1', '4', '9')); // true</code></pre>
+<h2 id="partition"><a href="#partition" class="anchor">#</a><code>->partition()</code></h2>
+<p>This method is similar to <code>->group()</code> method but the map keys are always booleans. The difference is that here the 2 keys are always present whereas with <code>->group()</code> it will depend on the original set.</p>
+<pre><code class="language-php">$set = Set::ints(1, 2, 3);
+/** @var Map<bool, Set<int>> */
+$map = $set->partition(fn($int) => $int % 2 === 0);
+$map->get(true)->equals(Set::ints(2)); // true
+$map->get(false)->equals(Set::ints(1, 3)); // true</code></pre>
+<h2 id="sort"><a href="#sort" class="anchor">#</a><code>->sort()</code></h2>
+<p>It will transform the set into an ordered sequence.</p>
+<pre><code class="language-php">$sequence = Set::ints(1, 4, 2, 3)->sort(fn($a, $b) => $a <=> $b);
+$sequence->equals(Sequence::ints(1, 2, 3, 4));</code></pre>
+<h2 id="merge"><a href="#merge" class="anchor">#</a><code>->merge()</code></h2>
+<p>Create a new set with all the elements from both sets.</p>
+<pre><code class="language-php">$set = Set::ints(1, 2, 3)->merge(Set::ints(4, 2, 3));
+$set->equals(Set::ints(1, 2, 3, 4));</code></pre>
+<h2 id="reduce"><a href="#reduce" class="anchor">#</a><code>->reduce()</code></h2>
+<p>Iteratively compute a value for all the elements in the set.</p>
+<pre><code class="language-php">$set = Set::ints(1, 2, 3, 4);
+$sum = $set->reduce(0, fn($sum, $int) => $sum + $int);
+$sum; // 10</code></pre>
+<h2 id="clear"><a href="#clear" class="anchor">#</a><code>->clear()</code></h2>
+<p>Create an empty new set of the same type.</p>
+<pre><code class="language-php">$set = Set::ints(1);
+$set->clear()->size(); // 0</code></pre>
+<h2 id="empty"><a href="#empty" class="anchor">#</a><code>->empty()</code></h2>
+<p>Tells whether there is at least one element or not.</p>
+<pre><code class="language-php">Set::ints()->empty(); // true
+Set::ints(1)->empty(); // false</code></pre>
+<h2 id="tosequenceof"><a href="#tosequenceof" class="anchor">#</a><code>->toSequenceOf()</code></h2>
+<p>Similar to <code>->toSetOf()</code> but it returns a <a href="sequence.html"><code>Sequence</code></a> instead. Since the source is a set (so without ordering) the order of elements in the sequence cannot be guaranteed.</p>
+<pre><code class="language-php">$sequence = Set::ints(1, 2, 3)->toSequenceOf(
+    'int|string',
+    function(int $int) {
+        yield $int;
+        yield (string) $int;
+    },
+);
+$sequence->equals(Sequence::of('int|string', 1, '1', 2, '2', 3, '3')); // true</code></pre>
+<h2 id="tosetof"><a href="#tosetof" class="anchor">#</a><code>->toSetOf()</code></h2>
+<p>This is similar to <code>->mapTo()</code> but you can yield multiple values for one original element.</p>
+<pre><code class="language-php">$set = Set::ints(1, 2, 3)->toSetOf(
+    'int|string',
+    function(int $int) {
+        yield $int;
+        yield (string) $int;
+    },
+);
+$set->equals(Set::of('int|string', 1, '1', 2, '2', 3, '3')); // true</code></pre>
+<h2 id="tomapof"><a href="#tomapof" class="anchor">#</a><code>->toMapOf()</code></h2>
+<p>Similar to <code>->toSetOf()</code> but it returns a <a href="map.html"><code>Map</code></a> instead.</p>
+<pre><code class="language-php">$map = Set::ints(1, 2, 3)->toMapOf(
+    'string',
+    'int',
+    function(int $int) {
+        yield (string) $int => $int;
+    },
+);
+$map->equals(
+    Map::of('string', 'int')
+        ('1', 1)
+        ('2', 2)
+        ('3', 3)
+); // true</code></pre>
+<h2 id="find"><a href="#find" class="anchor">#</a><code>->find()</code></h2>
+<p>Returns the first element that matches the predicate.</p>
+<pre><code class="language-php">$set = Set::ints(2, 4, 6, 8, 9, 10, 11);
+$firstOdd = $set->find(fn($i) => $i % 2 === 1);
+$firstOdd; // could be 9 or 11, because there is no ordering</code></pre>
+<h2 id="matches"><a href="#matches" class="anchor">#</a><code>->matches()</code></h2>
+<p>Check if all the elements of the set matches the given predicate.</p>
+<pre><code class="language-php">$isOdd = fn($i) => $i % 2 === 1;
+Set::ints(1, 3, 5, 7)->matches($isOdd); // true
+Set::ints(1, 3, 4, 5, 7)->matches($isOdd); // false</code></pre>
+<h2 id="any"><a href="#any" class="anchor">#</a><code>->any()</code></h2>
+<p>Check if at least one element of the set matches the given predicate.</p>
+<pre><code class="language-php">$isOdd = fn($i) => $i % 2 === 1;
+Set::ints(1, 3, 5, 7)->any($isOdd); // true
+Set::ints(1, 3, 4, 5, 7)->any($isOdd); // true
+Set::ints(2, 4, 6, 8)->any($isOdd); // false</code></pre></main><footer><a href="https://github.com/innmind/immutable/" target="_blank">GitHub</a>
+    </footer></body></html>

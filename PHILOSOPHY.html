@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html><head><title>innmind/immutable</title><link rel="stylesheet" href="https://innmind.github.io/immutable/static/main.css"/><link rel="stylesheet" href="https://innmind.github.io/immutable/static/styles/default.css"/><link rel="stylesheet" href="https://innmind.github.io/immutable/static/styles/atom-one-dark.css"/><script src="https://innmind.github.io/immutable/static/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body>
+    <header><a href="https://innmind.github.io/immutable/"><code>immutable</code></a>
+    </header><aside><ul><li>
+                                    <a href="https://innmind.github.io/immutable/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details open><summary>
+                                                            Structures
+                                                    </summary><ul><li class="sub-item ">
+                                    <a href="https://innmind.github.io/immutable/SEQUENCE.html">
+                                        Sequence
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/immutable/SET.html">
+                                        Set
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/immutable/MAP.html">
+                                        Map
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/immutable/STR.html">
+                                        Str
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/immutable/REGEXP.html">
+                                        RegExp
+                                    </a>
+                                </li>
+                                                    </ul></details></li>
+                    <li>
+                                    <a href="https://innmind.github.io/immutable/TYPES.html">
+                        Types
+                    </a>
+                            </li>
+                    <li class="current">
+                                    <a href="https://innmind.github.io/immutable/PHILOSOPHY.html">
+                        Philosophy
+                    </a>
+                            </li>
+                </ul></aside><main><h1 id="philosophy"><a href="#philosophy" class="anchor">#</a>Philosophy</h1>
+<p>This project was born after working with other programming languages (like <a href="https://scala-lang.org/">Scala</a>) and discovering <a href="https://en.wikipedia.org/wiki/Functional_programming">functional programming</a>. This taught me 2 things:</p>
+<ul><li>higher order functions on data structures</li>
+<li>immutability</li>
+</ul><h2 id="higher-order-functions"><a href="#higher-order-functions" class="anchor">#</a>Higher order functions</h2>
+<p>PHP comes with a handful of functions to work on arrays and strings but many are missing for common use cases forcing us to implement then again and again.</p>
+<p>Examples for such cases are a <code>group</code> function on a map/set/sequence or <code>endsWith</code> on a string. <code>group</code> is a specific <code>reduce</code> function where the value computed is a map. <code>endsWith</code> is also a specific <code>substring</code> function.</p>
+<p>Higher order functions are built on top of smaller, more abstract, ones. Scala, and other languages, provides common ones on their data structures. And this project is heavily inspired from them.</p>
+<h2 id="immutability"><a href="#immutability" class="anchor">#</a>Immutability</h2>
+<p>One of the core principles of functional programming is that data structures cannot change, you can only create a modified copy of them. This is extremely powerful as you can blindly give your data as a function argument with the certainty that it will not be altered. It allows you only focus on the function you are working one, without the need to worry it will have a side effect in other function, or another function triggering a side effect in yours.</p>
+<p>Another aspect of immutability is the notion of implicit state. For example in PHP an array is considered immutable because when you give it as a function argument it will create a copy of the variable. But with it comes an implicit state which is its cursor, and it is not reinitialised when a copy is created.</p>
+<p>This implicit state can generate subtle bugs in your code, that's why the structures in this project don't implement the <code>\Iterator</code> interface in order to always expose complete functions.</p></main><footer><a href="https://github.com/innmind/immutable/" target="_blank">GitHub</a>
+    </footer></body></html>
