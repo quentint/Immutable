@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>innmind/immutable</title>
+    <link rel="stylesheet" href="https://innmind.github.io/Immutable/static/main.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Immutable/static/styles/default.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Immutable/static/styles/atom-one-dark.css"/>
+    <script src="https://innmind.github.io/Immutable/static/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <a href="https://innmind.github.io/Immutable/"><code>immutable</code></a>
+    </header>
+    <aside>
+        <ul>
+                    <li>
+                                    <a href="https://innmind.github.io/Immutable/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details open>
+                        <summary>
+                                                            Structures
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/SEQUENCE.html">
+                                        Sequence
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/SET.html">
+                                        Set
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/MAP.html">
+                                        Map
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/STR.html">
+                                        Str
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/REGEXP.html">
+                                        RegExp
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/MAYBE.html">
+                                        Maybe
+                                    </a>
+                                </li>
+                                                            <li class="sub-item current">
+                                    <a href="https://innmind.github.io/Immutable/EITHER.html">
+                                        Either
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                    <li>
+                                    <a href="https://innmind.github.io/Immutable/TYPES.html">
+                        Types
+                    </a>
+                            </li>
+                    <li>
+                                    <a href="https://innmind.github.io/Immutable/BLACKBOX.html">
+                        Blackbox
+                    </a>
+                            </li>
+                    <li>
+                                    <a href="https://innmind.github.io/Immutable/PHILOSOPHY.html">
+                        Philosophy
+                    </a>
+                            </li>
+                </ul>
+    </aside>
+    <main><h1 id="either"><a href="#either" class="anchor">#</a><code>Either</code></h1>
+<p>This structure represent an alternative between 2 possibles types <code>L</code> and <code>R</code> (left and right), with a bias toward the right value. Usually this is used to represent <code>Either<SomeError, ValidValue></code>, the valid value being on the right side benefit the right bias as <code>map</code>, <code>flatMap</code> and <code>filter</code> are done on the right value.</p>
+<p>This technique is borrowed from the functional programming world.</p>
+<p>For the examples below we will use the given imaginary functions:</p>
+<pre><code class="language-php">use Innmind\Immutable\Either;
+
+/**
+ * @return Either<Error, User>
+ */
+function identify(ServerRequest $request): Either {
+    if (/* some condition */) {
+        return Either::right($theUser);
+    }
+
+    Either::left(new Error('User not found'));
+}
+
+/**
+ * @return Either<Error, Resource>
+ */
+function accessResource(User $user): Either {
+    if (/* check if user is allowed */) {
+        return Either::right($resource);
+    }
+
+    return Either::left(new Error('User is not allowed'));
+}</code></pre>
+<p><strong>Note</strong>: <code>ServerRequest</code>, <code>User</code>, <code>Resource</code> and <code>Error</code> are imaginary classes.</p>
+<p><strong>Important</strong>: this structure is immutable and is only typed with <a href="http://psalm.dev/">Psalm</a> to keep the interface simple and jump between types more easily. So make sure to use Psalm in your code so you know if you use the structure correctly.</p>
+<h2 id="left"><a href="#left" class="anchor">#</a><code>::left()</code></h2>
+<p>This builds an <code>Either</code> instance with the given value in the left hand side.</p>
+<pre><code class="language-php">$either = Either::left($anyValue);</code></pre>
+<p><strong>Note</strong>: usually this side is used for errors.</p>
+<h2 id="right"><a href="#right" class="anchor">#</a><code>::right()</code></h2>
+<p>This builds an <code>Either</code> instance with the given value in the right hand side.</p>
+<pre><code class="language-php">$either = Either::right($anyValue);</code></pre>
+<p><strong>Note</strong>: usually this side is used for valid values.</p>
+<h2 id="map"><a href="#map" class="anchor">#</a><code>->map()</code></h2>
+<p>This will apply the map transformation on the right value if there is one, otherwise it's only a type change.</p>
+<pre><code class="language-php">/** @var Either<Error, User> */
+$either = identify($serverRequest)
+/** @var Either<Error, Impersonated> */
+$impersonated = $either->map(fn(User $user): Impersonated => $user->impersonateAdmin());</code></pre>
+<h2 id="flatmap"><a href="#flatmap" class="anchor">#</a><code>->flatMap()</code></h2>
+<p>This is similar to <code>->map()</code> but instead of returning the new right value you return a new <code>Either</code> object.</p>
+<pre><code class="language-php">/** @var Either<Error, User> */
+$either = identify($serverRequest);
+/** @var Either<Error, Resource> */
+$resource = $either->flatMap(fn(User $user): Either => accessResource($user));</code></pre>
+<p><strong>Important</strong>: the left type of an <code>Either</code> returned by the <code>->flatMap</code> cannot change as the next call on <code>$resource</code> you wouldn't know if it's the old left type or the new one.</p>
+<h2 id="match"><a href="#match" class="anchor">#</a><code>->match()</code></h2>
+<p>This is the only way to extract the wrapped value.</p>
+<pre><code class="language-php">/** @var Response */
+$response = identify($serverRequest)
+    ->flatMap(fn(User $user): Either => accessResource($user))
+    ->match(
+        fn(Error $error) => new Response(400, $error->message()), // here the error can be from identify or from accessResource
+        fn(Resource $resource) => new Response(200, $resource->toString()),
+    );</code></pre>
+<p><strong>Note</strong>: <code>Response</code> is an imaginary class.</p>
+<p>Both functions used with <code>->match()</code> <strong>must</strong> have the same return type. Otherwise you would have to check the type of the returned value to know what to do next, this would break the logic of this approach that frees you from writing any <code>if</code> statement.</p>
+<h2 id="otherwise"><a href="#otherwise" class="anchor">#</a><code>->otherwise()</code></h2>
+<p>This is like <code>->flatMap()</code> but is called when the instance contains a left value. The callable must return an <code>Either</code> with the same types as the previous one.</p>
+<pre><code class="language-php">/**
+ * @return Either<Error, User>
+ */
+function identifyViaJsonPayload(ServerRequest $request): Either {
+    if (/* find user from json payload */) {
+        return Either::right($theUser);
+    }
+
+    return Either::left(new Error('User not found'));
+}
+
+/** @var Either<Error, User> */
+$either = identify($request)
+    ->otherwise(fn() => identifyViaJsonPayload($request));</code></pre>
+<h2 id="filter"><a href="#filter" class="anchor">#</a><code>->filter()</code></h2>
+<p>Use this method to validate the right value when there is one. If the predicate doesn't accept the right value then it will return the value from the second callable as a left value.</p>
+<pre><code class="language-php">identify($request)
+    ->filter(
+        fn(User $user): bool => $user->isAllowed(),
+        fn() => new Error('User is not allowed'),
+    )
+    ->match(
+        fn(Error $error) => print($error->message()), // can be "User not found" or "User is not allowed"
+        fn(User $user) => doSomething($user), // here we know the user is allowed
+    );</code></pre></main>
+    <footer>
+        <a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>

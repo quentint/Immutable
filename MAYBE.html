@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>innmind/immutable</title>
+    <link rel="stylesheet" href="https://innmind.github.io/Immutable/static/main.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Immutable/static/styles/default.css"/>
+    <link rel="stylesheet" href="https://innmind.github.io/Immutable/static/styles/atom-one-dark.css"/>
+    <script src="https://innmind.github.io/Immutable/static/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <a href="https://innmind.github.io/Immutable/"><code>immutable</code></a>
+    </header>
+    <aside>
+        <ul>
+                    <li>
+                                    <a href="https://innmind.github.io/Immutable/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details open>
+                        <summary>
+                                                            Structures
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/SEQUENCE.html">
+                                        Sequence
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/SET.html">
+                                        Set
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/MAP.html">
+                                        Map
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/STR.html">
+                                        Str
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/REGEXP.html">
+                                        RegExp
+                                    </a>
+                                </li>
+                                                            <li class="sub-item current">
+                                    <a href="https://innmind.github.io/Immutable/MAYBE.html">
+                                        Maybe
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/EITHER.html">
+                                        Either
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                    <li>
+                                    <a href="https://innmind.github.io/Immutable/TYPES.html">
+                        Types
+                    </a>
+                            </li>
+                    <li>
+                                    <a href="https://innmind.github.io/Immutable/BLACKBOX.html">
+                        Blackbox
+                    </a>
+                            </li>
+                    <li>
+                                    <a href="https://innmind.github.io/Immutable/PHILOSOPHY.html">
+                        Philosophy
+                    </a>
+                            </li>
+                </ul>
+    </aside>
+    <main><h1 id="maybe"><a href="#maybe" class="anchor">#</a><code>Maybe</code></h1>
+<p>This type is another approach to represent the possible abscence of a value. Instead of a function returning a result of type <code>T</code> or <code>null</code> it would return <code>Maybe<T></code>.</p>
+<p>This technique is borrowed from the functional programming world.</p>
+<p>For the examples below will use the given imaginary function:</p>
+<pre><code class="language-php">use Innmind\Immutable\Maybe;
+
+/** @return Maybe<string> */
+function env(string $name): Maybe {
+    $value = \getenv($name);
+
+    return $value === false ? Maybe::nothing() : Maybe::just($value);
+}</code></pre>
+<p><strong>Important</strong>: this structure is immutable and is only typed with <a href="http://psalm.dev/">Psalm</a> to keep the interface simple and jump between types more easily. So make sure to use Psalm in your code so you know if you use the structure correctly.</p>
+<h2 id="just"><a href="#just" class="anchor">#</a><code>::just()</code></h2>
+<p>This named constructor tells that there <strong>is</strong> a value that can be used.</p>
+<h2 id="nothing"><a href="#nothing" class="anchor">#</a><code>::nothing()</code></h2>
+<p>This named constructor tells that there is <strong>no</strong> value that can be used.</p>
+<h2 id="of"><a href="#of" class="anchor">#</a><code>::of()</code></h2>
+<p>This is a shortcut so you don't have to write the <code>if (is_null)</code> yourself.</p>
+<pre><code class="language-php">$maybe = \is_null($value) ? Maybe::nothing() : Maybe::just($value);
+// is equivalent to
+$maybe = Maybe::of($value);</code></pre>
+<h2 id="map"><a href="#map" class="anchor">#</a><code>->map()</code></h2>
+<p>This function allows you to transform the value into another value that will be wrapped in a <code>Maybe</code> object.</p>
+<pre><code class="language-php">$dsn = env('LOGGER_DSN');
+/** @var Maybe<array> */
+$parsedDsn = $dsn->map(fn(string $dsn): array => \parse_url($dsn));</code></pre>
+<h2 id="flatmap"><a href="#flatmap" class="anchor">#</a><code>->flatMap()</code></h2>
+<p>This is similar to the <code>->map()</code> function but instead of returning the value you need to return a wrapped value.</p>
+<pre><code class="language-php">/**
+ * This is an imaginary function that would retrieve a User from a database
+ * (or elsewhere)
+ *
+ * @param string $id
+ *
+ * @return Maybe<User>
+ */
+function getUser(string $id): Maybe {
+    // imaginary implementation
+}
+
+$adminId = env('ADMIN_ID');
+/** @var Maybe<User> */
+$admin = $adminId->flatMap(fn($id) => getUser($id));</code></pre>
+<p>This allows you to continue chaining calls on <code>Maybe</code> instances by juggling with wrapped types.</p>
+<h2 id="match"><a href="#match" class="anchor">#</a><code>->match()</code></h2>
+<p>This is the only way to extract the wrapped value. But you need to handle both cases where the value exists or where the value doesn't exist.</p>
+<p>The example below uses the imaginary <code>Logger</code> and <code>NullLogger</code> classes.</p>
+<pre><code class="language-php">$dsn = env('LOGGER_DSN');
+$logger = $dsn->match(
+    static fn(string $url) => new Logger($url),
+    static fn() => new NullLogger,
+);</code></pre>
+<p>Both functions used with <code>->match()</code> <strong>must</strong> have the same return type. Otherwise you would have to check the type of the returned value to know what to do next, this would break the logic of this approach that frees you from writing any <code>if</code> statement.</p>
+<h2 id="otherwise"><a href="#otherwise" class="anchor">#</a><code>->otherwise()</code></h2>
+<p>This is like <code>->flatMap()</code> but is called when there is no value wrapped. The other difference from <code>->flatMap()</code> is that you must return the same wrapped value type.</p>
+<p>This is useful to create a chain of alternative strategies.</p>
+<pre><code class="language-php">/** @var Maybe<string> */
+$dsn = env('DATABASE_LOGGER_DSN')
+    ->otherwise(fn() => env('SENTRY_LOGGER_DSN'))
+    ->otherwise(fn() => env('FILE_LOGGER_DSN'));</code></pre>
+<p>This example will first try to retrieve the <code>DATABASE_LOGGER_DSN</code>, if it doesn't exist it will try the <code>SENTRY_LOGGER_DSN</code>. If the sentry one exists then it will not try to retrieve <code>FILE_LOGGER_DSN</code>.</p>
+<h2 id="filter"><a href="#filter" class="anchor">#</a><code>->filter()</code></h2>
+<p>When there is a wrapped value it will call the given predicate. If the condition is successful then nothing happens but if it fails it will return a <code>Maybe::nothing()</code>.</p>
+<pre><code class="language-php">$dsn = env('LOGGER_DSN');
+/** @var Maybe<string> */
+$validDsn = $dsn->filter(fn(string $url): bool => \filter_var($url, \FILTER_VALIDATE_URL));</code></pre>
+<p><code>$validDsn</code> will contain either a valid url or nothing.</p></main>
+    <footer>
+        <a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>
