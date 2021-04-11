@@ -167,7 +167,12 @@ $either = identify($request)
     ->match(
         fn(Error $error) => print($error->message()), // can be "User not found" or "User is not allowed"
         fn(User $user) => doSomething($user), // here we know the user is allowed
-    );</code></pre></main>
+    );</code></pre>
+<h2 id="leftmap"><a href="#leftmap" class="anchor">#</a><code>->leftMap()</code></h2>
+<p>This is similar to the <code>->map()</code> function but will be applied on the left value only.</p>
+<pre><code class="language-php">/** @var Either<ErrorResponse, User> */
+$either = identify($request)
+    ->leftMap(fn(Error $error) => new ErrorResponse($error));</code></pre></main>
     <footer>
         <a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
     </footer>
