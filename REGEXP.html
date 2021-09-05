@@ -64,9 +64,23 @@
                     </details>
                             </li>
                     <li>
-                                    <a href="https://innmind.github.io/Immutable/TYPES.html">
-                        Types
-                    </a>
+                                    <details open>
+                        <summary>
+                                                            Use cases
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/LAZY_FILE.html">
+                                        How to read a file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/PARSING.html">
+                                        Parsing strings
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
                             </li>
                     <li>
                                     <a href="https://innmind.github.io/Immutable/BLACKBOX.html">
@@ -85,7 +99,7 @@
 <h2 id="of"><a href="#of" class="anchor">#</a><code>::of()</code></h2>
 <p>This is the named cosntructor for this class.</p>
 <pre><code class="language-php">RegExp::of('/foo/') instanceof RegExp; // true
-RegExp::of('foo'); // throws Innmind\Immutable\Exception\DomainException</code></pre>
+RegExp::of('foo'); // throws Innmind\Immutable\Exception\LogicException</code></pre>
 <h2 id="matches"><a href="#matches" class="anchor">#</a><code>->matches()</code></h2>
 <p>Both examples do the same thing.</p>
 <pre><code class="language-php">RegExp::of('/^a/')->matches(Str::of('abcdef'));

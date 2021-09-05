@@ -64,9 +64,23 @@
                     </details>
                             </li>
                     <li>
-                                    <a href="https://innmind.github.io/Immutable/TYPES.html">
-                        Types
-                    </a>
+                                    <details open>
+                        <summary>
+                                                            Use cases
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/LAZY_FILE.html">
+                                        How to read a file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/PARSING.html">
+                                        Parsing strings
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
                             </li>
                     <li>
                                     <a href="https://innmind.github.io/Immutable/BLACKBOX.html">
@@ -81,226 +95,208 @@
                 </ul>
     </aside>
     <main><h1 id="map"><a href="#map" class="anchor">#</a><code>Map</code></h1>
-<p>A map is an unordered list of pair of elements, think of it like an associative array or a <code>array<T, S></code> in the <a href="http://psalm.dev/">Psalm</a> nomenclature. But with the added benefit that the keys can be of any type, even objects!</p>
-<p>A map is always typed in order to be sure it only contains elements of the type you specified. If you try to add an element of a different type it will throw an error.</p>
+<p>A map is an unordered list of pair of elements, think of it like an associative array or an <code>array<T, S></code> in the <a href="http://psalm.dev/">Psalm</a> nomenclature. But with the added benefit that the keys can be of any type, even objects!</p>
 <h2 id="of"><a href="#of" class="anchor">#</a><code>::of()</code></h2>
-<p>The <code>of</code> static method allows you to create a new map of the given <a href="TYPES.html">types</a>:</p>
 <pre><code class="language-php">use Innmind\Immutable\Map;
 
 /** @var Map<object, int> */
-$map = Map::of('object', 'int');</code></pre>
-<p>The first type is for the keys and the second one for the values. This order is the same for all the methods below where you specified both types.</p>
-<h2 id="isoftype"><a href="#isoftype" class="anchor">#</a><code>->isOfType()</code></h2>
-<p>This method is here to help you know the map is of a certain type:</p>
-<pre><code class="language-php">$map = Map::of('object', 'int');
-$map->isOfType('stdClass', 'int'); // false
-$map->isOfType('object', 'float'); // false
-$map->isOfType('object', 'int'); // true</code></pre>
-<h2 id="keytype"><a href="#keytype" class="anchor">#</a><code>->keyType()</code></h2>
-<p>This returns the keys type you specified at initialisation.</p>
-<pre><code class="language-php">$map = Map::of('stdClass', 'int');
-$map->keyType(); // 'stdClass'</code></pre>
-<h2 id="valuetype"><a href="#valuetype" class="anchor">#</a><code>->valueType()</code></h2>
-<p>This returns the values type you specified at initialisation.</p>
-<pre><code class="language-php">$map = Map::of('stdClass', 'int');
-$map->valueType(); // 'int'</code></pre>
+$map = Map::of();</code></pre>
+<p>The first type is for the keys and the second one for the values. This order is the same for all the methods below.</p>
 <h2 id="invoke"><a href="#invoke" class="anchor">#</a><code>->__invoke()</code></h2>
 <p>Augment the map with a new pair of elements. If the key already exist it will replace the value.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int');
+<pre><code class="language-php">$map = Map::of();
 $map = ($map)(1, 2);
 $map->equals(
-    Map::of('int', 'int')->put(1, 2),
+    Map::of([1, 2]),
 );</code></pre>
 <h2 id="put"><a href="#put" class="anchor">#</a><code>->put()</code></h2>
 <p>This is an alias for <code>->__invoke()</code>.</p>
 <h2 id="size"><a href="#size" class="anchor">#</a><code>->size()</code></h2>
 <p>This returns the number of elements in the map.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(1, 2);
+<pre><code class="language-php">$map = Map::of([1, 2]);
 $map->size(); // 1</code></pre>
 <h2 id="count"><a href="#count" class="anchor">#</a><code>->count()</code></h2>
 <p>This is an alias for <code>->size()</code>, but you can also use the PHP function <code>\count</code> if you prefer.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(1, 2);
+<pre><code class="language-php">$map = Map::of([1, 2]);
 $map->size(); // 1
 \count($map); // 1</code></pre>
 <h2 id="get"><a href="#get" class="anchor">#</a><code>->get()</code></h2>
-<p>Return the value associated to the given key.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(1, 2)(3, 4);
-$map->get(1); // 2
-$map->get(2); // throws Innmind\Immutable\Exception\ElementNotFound</code></pre>
+<p>Return an instance of <a href="maybe.html"><code>Maybe</code></a> that may contain the value associated to the given key (if it exists).</p>
+<pre><code class="language-php">$map = Map::of([1, 2], [3, 4]);
+$map->get(1); // Maybe::just(2)
+$map->get(2); // Maybe::nothing()</code></pre>
 <h2 id="contains"><a href="#contains" class="anchor">#</a><code>->contains()</code></h2>
 <p>Check if the map contains a given key.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(1, 2)(3, 4);
+<pre><code class="language-php">$map = Map::of([1, 2], [3, 4]);
 $map->contains(1); // true
 $map->contains(2); // false</code></pre>
 <h2 id="clear"><a href="#clear" class="anchor">#</a><code>->clear()</code></h2>
-<p>Return an empty new map of the same type.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(1, 2)(3, 4);
+<p>Return an empty new map of the same type. Useful to avoid to respecify the templates types of the map in a new docblock annotation.</p>
+<pre><code class="language-php">$map = Map::of([1, 2], [3, 4]);
 $map->clear()->size(); // 0</code></pre>
 <h2 id="equals"><a href="#equals" class="anchor">#</a><code>->equals()</code></h2>
 <p>Check if two maps are identical.</p>
-<pre><code class="language-php">$a = Map::of('int', 'int')(1, 2)(3, 4);
-$b = Map::of('int', 'int')(3, 4)(1, 2);
+<pre><code class="language-php">$a = Map::of([1, 2], [3, 4]);
+$b = Map::of([3, 4], [1, 2]);
 $a->equals($b); // true
-$a->equals(Map::of('string', 'int')); // throws \TypeError</code></pre>
+$a->equals(Map::of(); // false</code></pre>
 <h2 id="filter"><a href="#filter" class="anchor">#</a><code>->filter()</code></h2>
 <p>Removes the pairs from the map that don't match the given predicate.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(1, 1)(3, 2);
+<pre><code class="language-php">$map = Map::of([1, 1], [3, 2]);
 $map = $map->filter(fn($key, $value) => ($key + $value) % 2 === 0);
-$map->equals(Map::of('int', 'int')(1, 1));</code></pre>
+$map->equals(Map::of([1, 1]));</code></pre>
 <h2 id="foreach"><a href="#foreach" class="anchor">#</a><code>->foreach()</code></h2>
-<p>Use this method to call a function for each pair of the map. Since this method doesn't return anything it is the only place acceptable to create side effects.</p>
-<pre><code class="language-php">Map::of('string', 'string')('hello', 'world')->foreach(function(string $key, string $value): void {
-    echo "$key $value";
+<p>Use this method to call a function for each pair of the map. Since this structure is immutable it returns a <code>SideEffect</code> object, as its name suggest it is the only place acceptable to create side effects.</p>
+<pre><code class="language-php">$sideEffect = Map::of(['hello', 'world'])->foreach(function(string $key, string $value): void {
+    echo "$key $value"; // will print "hello world"
 });</code></pre>
-<h2 id="group"><a href="#group" class="anchor">#</a><code>->group()</code></h2>
-<p>This will create multiples maps with elements regrouped under the same key computed by the given function.</p>
-<pre><code class="language-php">$urls = Map::of('string', 'int')
-    ('http://example.com', 1)
-    ('http://example.com/foo', 1)
-    ('https://example.com', 2)
-    ('ftp://example.com', 4);
-/** @var Map<string, Map<string, string>> */
-$map = $urls->group(
-    'string',
-    fn(string $url, int $whatever): string => \parse_url($url)['scheme'],
-);
-$map->get('http')->equals(
-    Map::of('string', 'int')('http://example.com', 1)('http://example.com/foo', 1),
-); // true
-$map->get('https')->equals(
-    Map::of('string', 'int')('https://example.com', 2),
-); // true
-$map->get('ftp')->equals(
-    Map::of('string', 'int')('ftp://example.com', 4),
-); // true</code></pre>
+<p>In itself the <code>SideEffect</code> object has no use except to avoid psalm complaining that the <code>foreach</code> method is not used.</p>
 <h2 id="groupby"><a href="#groupby" class="anchor">#</a><code>->groupBy()</code></h2>
-<p>This is similar to the <code>->group()</code> method with the exception that the key type of the returned <code>Map</code> will be determined by the first computed key value.</p>
-<p>Since the key type is computed you cannot call <code>->groupBy()</code> on an empty map, otherwise it will throw <code>Innmind\Immutable\Exception\CannotGroupEmptyStructure</code>.</p>
-<pre><code class="language-php">$urls = Map::of('string', 'int')
-    ('http://example.com', 1)
-    ('http://example.com/foo', 1)
-    ('https://example.com', 2)
-    ('ftp://example.com', 4);
+<p>This will create multiples maps with elements regrouped under the same key computed by the given function.</p>
+<pre><code class="language-php">$urls = Map::of(
+    ['http://example.com', 1],
+    ['http://example.com/foo', 1],
+    ['https://example.com', 2],
+    ['ftp://example.com', 4],
+);
 /** @var Innmind\Immutable\Map<string, Sequence<string>> */
 $map = $urls->groupBy(fn(string $url, int $whatever): string => \parse_url($url)['scheme']);
-$map->get('http')->equals(
-    Map::of('string', 'int')('http://example.com', 1)('http://example.com/foo', 1),
-); // true
-$map->get('https')->equals(
-    Map::of('string', 'int')('https://example.com', 2),
-); // true
-$map->get('ftp')->equals(
-    Map::of('string', 'int')('ftp://example.com', 4),
-); // true</code></pre>
+$map
+    ->get('http')
+    ->match(
+        static fn($group) => $group,
+        static fn() => Map::of(),
+    )
+    ->equals(Map::of(
+        ['http://example.com', 1],
+        ['http://example.com/foo', 1]
+    )); // true
+$map
+    ->get('https')
+    ->match(
+        static fn($group) => $group,
+        static fn() => Map::of(),
+    )
+    ->equals(Map::of(['https://example.com', 2])); // true
+$map
+    ->get('ftp')
+    ->match(
+        static fn($group) => $group,
+        static fn() => Map::of(),
+    )
+    ->equals(Map::of(['ftp://example.com', 4])); // true</code></pre>
 <h2 id="keys"><a href="#keys" class="anchor">#</a><code>->keys()</code></h2>
 <p>Return a <a href="SET.html"><code>Set</code></a> of all the keys of the map.</p>
-<pre><code class="language-php">$keys = Map::of('int', 'int')(24, 1)(42, 2)->keys();
+<pre><code class="language-php">$keys = Map::of([24, 1], [42, 2])->keys();
 $keys->equals(Set::of(24, 42)); // true</code></pre>
 <h2 id="values"><a href="#values" class="anchor">#</a><code>->values()</code></h2>
 <p>Return a <a href="SEQUENCE.html"><code>Sequence</code></a> of all the values of the map.</p>
-<pre><code class="language-php">$values = Map::of('int', 'int')(24, 1)(42, 2)->values();
+<pre><code class="language-php">$values = Map::of([24, 1], [42, 2])->values();
 $values->equals(Sequence::of(1, 2)); // true</code></pre>
-<p><strong>Note</strong>: it returns a <code>Sequence</code> because it can contains duplicates, the order is not guaranteed as a map is not ordered.</p>
+<p><strong>Note</strong>: it returns a <code>Sequence</code> because it can contain duplicates, the order is not guaranteed as a map is not ordered.</p>
 <h2 id="map"><a href="#map" class="anchor">#</a><code>->map()</code></h2>
 <p>Create a new map of the same type with the exact same number of pairs but modified by the given function.</p>
-<pre><code class="language-php">use Innmind\Immutable\Pair;
-
-$urls = Map::of('string', 'int')
-    ('example.com', 1)
-    ('github.com', 1)
-    ('news.ycombinator.com', 1)
-    ('reddit.com', 1);
+<pre><code class="language-php">$urls = Map::of(
+    ['example.com', 1],
+    ['github.com', 1],
+    ['news.ycombinator.com', 1],
+    ['reddit.com', 1],
+);
 $incremented = $map->map(fn($key, $value) => $value + 1);
 $incremented->equals(
-    Map::of('string', 'int')
-        ('example.com', 2)
-        ('github.com', 2)
-        ('news.ycombinator.com', 2)
-        ('reddit.com', 2)
+    Map::of(
+        ['example.com', 2]
+        ['github.com', 2]
+        ['news.ycombinator.com', 2]
+        ['reddit.com', 2]
+    ),
+);</code></pre>
+<h2 id="flatmap"><a href="#flatmap" class="anchor">#</a><code>->flatMap()</code></h2>
+<p>This is similar to <code>->map()</code> but instead of returning a new value it returns a new <code>Map</code> for each value, all maps are merged to form only one <code>Map</code>.</p>
+<p>This is usefull to generate multiple pairs for each initial pair or to modify the keys.</p>
+<pre><code class="language-php">$urls = Map::of(
+    ['example.com', 1],
+    ['github.com', 1],
+    ['news.ycombinator.com', 1],
+    ['reddit.com', 1],
 );
-$withScheme = $map->map(fn($key, $value) => new Pair("http://$key", $value));
+$withScheme = $map->map(fn($key, $value) => Map::of(
+    ["http://$key", $value],
+    ["https://$key", $value],
+));
 $withScheme->equals(
-    Map::of('string', 'int')
-        ('http://example.com', 1)
-        ('http://github.com', 1)
-        ('http://news.ycombinator.com', 1)
-        ('http://reddit.com', 1)
+    Map::of(
+        ['http://example.com', 1],
+        ['https://example.com', 1],
+        ['http://github.com', 1],
+        ['https://github.com', 1],
+        ['http://news.ycombinator.com', 1],
+        ['https://news.ycombinator.com', 1],
+        ['http://reddit.com', 1],
+        ['https://reddit.com', 1],
+    ),
 );</code></pre>
 <h2 id="remove"><a href="#remove" class="anchor">#</a><code>->remove()</code></h2>
 <p>Remove the pair from the map with the given key.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(2, 3)(3, 4);
-$map->remove(3)->equals(Map::of('int', 'int')(2, 3)); // true</code></pre>
+<pre><code class="language-php">$map = Map::of([2, 3], [3, 4]);
+$map->remove(3)->equals(Map::of([2, 3])); // true</code></pre>
 <h2 id="merge"><a href="#merge" class="anchor">#</a><code>->merge()</code></h2>
 <p>Create a new map with all pairs from both maps. Pairs from the map in the argument will replace existing pairs from the original map.</p>
-<pre><code class="language-php">$a = Map::of('int', 'int')(1, 2)(3, 4);
-$b = Map::of('int', 'int')(5, 6)(3, 7);
+<pre><code class="language-php">$a = Map::of([1, 2], [3, 4]);
+$b = Map::of([5, 6], [3, 7]);
 $a->merge($b)->equals(
-    Map::of('int', 'int')
-        (1, 2)
-        (5, 6)
-        (3, 7),
+    Map::of(
+        [1, 2],
+        [5, 6],
+        [3, 7],
+    ),
 ); // true</code></pre>
 <h2 id="partition"><a href="#partition" class="anchor">#</a><code>->partition()</code></h2>
-<p>This method is similar to <code>->group()</code> method but the map keys are always booleans. The difference is that here the 2 keys are always present whereas with <code>->group()</code> it will depend on the original map.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(1, 2)(2, 3)(3, 3);
+<p>This method is similar to <code>->groupBy()</code> method but the map keys are always booleans. The difference is that here the 2 keys are always present whereas with <code>->groupBy()</code> it will depend on the original map.</p>
+<pre><code class="language-php">$map = Map::of([1, 2], [2, 3], [3, 3]);
 /** @var Map<bool, Map<int, int>> */
 $map = $map->partition(fn($key, $value) => ($key + $value) % 2 === 0);
-$map->get(true)->equals(Map::of('int', 'int')(3, 3)); // true
-$map->get(false)->equals(Map::of('int', 'int')(1, 2)(2, 3)); // true</code></pre>
+$map
+    ->get(true)
+    ->match(
+        static fn($partition) => $partition,
+        static fn() => Map::of(),
+    )
+    ->equals(Map::of([3, 3])); // true
+$map
+    ->get(false)
+    ->match(
+        static fn($partition) => $partition,
+        static fn() => Map::of(),
+    )
+    ->equals(Map::of([1, 2], [2, 3])); // true</code></pre>
 <h2 id="reduce"><a href="#reduce" class="anchor">#</a><code>->reduce()</code></h2>
 <p>Iteratively compute a value for all the pairs in the map.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(1, 2)(2, 3)(3, 3);
+<pre><code class="language-php">$map = Map::of([1, 2], [2, 3], [3, 3]);
 $sum = $map->reduce(0, fn($sum, $key, $value) => $sum + $key + $value);
 $sum; // 14</code></pre>
 <h2 id="empty"><a href="#empty" class="anchor">#</a><code>->empty()</code></h2>
 <p>Tells whether there is at least one pair or not.</p>
-<pre><code class="language-php">Map::of('int', 'int')->empty(); // true
-Map::of('int', 'int')(1, 2)->empty(); // false</code></pre>
-<h2 id="tosequenceof"><a href="#tosequenceof" class="anchor">#</a><code>->toSequenceOf()</code></h2>
-<p>Create a new sequence with the value computed from the pairs.</p>
-<pre><code class="language-php">$sequence = Map::of('int', 'int')(1, 2)(3, 4)->toSequenceOf(
-    'int',
-    function(int $key, int $value) {
-        yield $key;
-        yield $value;
-    },
-);
-$sequence->equals(Sequence::of('int|string', 1, 2, 3, 4)); // true</code></pre>
-<h2 id="tosetof"><a href="#tosetof" class="anchor">#</a><code>->toSetOf()</code></h2>
-<p>Similar to <code>->toSequenceOf()</code> but it returns a <a href="SET.html"><code>Set</code></a> instead.</p>
-<pre><code class="language-php">$set = Map::of('int', 'int')(1, 2)(3, 4)->toSetOf(
-    'int',
-    function(int $key, int $value) {
-        yield $key;
-        yield $value;
-    },
-);
-$set->equals(Set::of('int|string', 1, '1', 2, '2', 3, '3')); // true</code></pre>
-<h2 id="tomapof"><a href="#tomapof" class="anchor">#</a><code>->toMapOf()</code></h2>
-<p>Similar to <code>->toSequenceOf()</code> but it returns a <code>Map</code> instead.</p>
-<pre><code class="language-php">$map = Map::of('int', 'int')(1, 2)(3, 4)->toMapOf(
-    'string',
-    'int',
-    function(int $key, int $value) {
-        yield (string) $key => $int;
-    },
-);
-$map->equals(
-    Map::of('string', 'int')
-        ('1', 2)
-        ('3', 4)
-); // true</code></pre>
+<pre><code class="language-php">Map::of()->empty(); // true
+Map::of([1, 2])->empty(); // false</code></pre>
+<h2 id="find"><a href="#find" class="anchor">#</a><code>->find()</code></h2>
+<p>This will return the first pair that matches the given predicate (remember that the map is not ordered).</p>
+<pre><code class="language-php">use Innmind\Immutable\Pair;
+
+Map::of([1, 2], [3, 4], [5, 6], [7, 8])->find(
+    fn($key, $value) => ($key + $value) > 10,
+); // Maybe::just(new Pair(5, 6))</code></pre>
 <h2 id="matches"><a href="#matches" class="anchor">#</a><code>->matches()</code></h2>
 <p>Check if all the pairs of the map matches the given predicate.</p>
 <pre><code class="language-php">$isOdd = fn($i) => $i % 2 === 1;
-Map::of('int', 'int')(1, 2)(3, 4)->matches(fn($key) => $isOdd($key)); // true
-Map::of('int', 'int')(1, 2)(3, 4)->matches(fn($key, $value) => $isOdd($value)); // false</code></pre>
+Map::of([1, 2], [3, 4])->matches(fn($key) => $isOdd($key)); // true
+Map::of([1, 2], [3, 4])->matches(fn($key, $value) => $isOdd($value)); // false</code></pre>
 <h2 id="any"><a href="#any" class="anchor">#</a><code>->any()</code></h2>
 <p>Check if at least one pair of the map matches the given predicate.</p>
 <pre><code class="language-php">$isOdd = fn($i) => $i % 2 === 1;
-Map::of('int', 'int')(1, 2)(3, 4)->any(fn($key) => $isOdd($key)); // true
-Map::of('int', 'int')(1, 3)(3, 4)->any(fn($key, $value) => $isOdd($value)); // true
-Map::of('int', 'int')(1, 2)(3, 4)->any(fn($key, $value) => $isOdd($value)); // false</code></pre></main>
+Map::of([1, 2], [3, 4])->any(fn($key) => $isOdd($key)); // true
+Map::of([1, 3], [3, 4])->any(fn($key, $value) => $isOdd($value)); // true
+Map::of([1, 2], [3, 4])->any(fn($key, $value) => $isOdd($value)); // false</code></pre></main>
     <footer>
         <a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
     </footer>

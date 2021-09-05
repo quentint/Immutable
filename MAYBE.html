@@ -64,9 +64,23 @@
                     </details>
                             </li>
                     <li>
-                                    <a href="https://innmind.github.io/Immutable/TYPES.html">
-                        Types
-                    </a>
+                                    <details open>
+                        <summary>
+                                                            Use cases
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/LAZY_FILE.html">
+                                        How to read a file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/PARSING.html">
+                                        Parsing strings
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
                             </li>
                     <li>
                                     <a href="https://innmind.github.io/Immutable/BLACKBOX.html">
@@ -92,7 +106,6 @@ function env(string $name): Maybe {
 
     return $value === false ? Maybe::nothing() : Maybe::just($value);
 }</code></pre>
-<p><strong>Important</strong>: this structure is immutable and is only typed with <a href="http://psalm.dev/">Psalm</a> to keep the interface simple and jump between types more easily. So make sure to use Psalm in your code so you know if you use the structure correctly.</p>
 <h2 id="just"><a href="#just" class="anchor">#</a><code>::just()</code></h2>
 <p>This named constructor tells that there <strong>is</strong> a value that can be used.</p>
 <h2 id="nothing"><a href="#nothing" class="anchor">#</a><code>::nothing()</code></h2>
@@ -102,6 +115,14 @@ function env(string $name): Maybe {
 <pre><code class="language-php">$maybe = \is_null($value) ? Maybe::nothing() : Maybe::just($value);
 // is equivalent to
 $maybe = Maybe::of($value);</code></pre>
+<h2 id="all"><a href="#all" class="anchor">#</a><code>::all()</code></h2>
+<p>This is a shortcut to make sure all the wrappers contain a value to easily combine them. If any of the arguments doesn't contain a value then the call to <code>->map()</code> or <code>->flatMap()</code> will return a <code>Maybe::nothing()</code>.</p>
+<pre><code class="language-php">$kernel = Maybe::all(env('ENV'), env('DEBUG'))
+    ->map(static fn(string $env, string $debug) => new Kernel($env, $debug))
+    ->match(
+        static fn(Kernel $kernel) => $kernel,
+        static fn() => throw new \Exception('ENV or DEBUG environment variable is missing (or both)'),
+    );</code></pre>
 <h2 id="map"><a href="#map" class="anchor">#</a><code>->map()</code></h2>
 <p>This function allows you to transform the value into another value that will be wrapped in a <code>Maybe</code> object.</p>
 <pre><code class="language-php">$dsn = env('LOGGER_DSN');
@@ -133,9 +154,8 @@ $logger = $dsn->match(
     static fn(string $url) => new Logger($url),
     static fn() => new NullLogger,
 );</code></pre>
-<p>Both functions used with <code>->match()</code> <strong>must</strong> have the same return type. Otherwise you would have to check the type of the returned value to know what to do next, this would break the logic of this approach that frees you from writing any <code>if</code> statement.</p>
 <h2 id="otherwise"><a href="#otherwise" class="anchor">#</a><code>->otherwise()</code></h2>
-<p>This is like <code>->flatMap()</code> but is called when there is no value wrapped. The other difference from <code>->flatMap()</code> is that you must return the same wrapped value type.</p>
+<p>This is like <code>->flatMap()</code> but is called when there is no value wrapped.</p>
 <p>This is useful to create a chain of alternative strategies.</p>
 <pre><code class="language-php">/** @var Maybe<string> */
 $dsn = env('DATABASE_LOGGER_DSN')

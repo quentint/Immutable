@@ -64,9 +64,23 @@
                     </details>
                             </li>
                     <li>
-                                    <a href="https://innmind.github.io/Immutable/TYPES.html">
-                        Types
-                    </a>
+                                    <details open>
+                        <summary>
+                                                            Use cases
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/LAZY_FILE.html">
+                                        How to read a file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/PARSING.html">
+                                        Parsing strings
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
                             </li>
                     <li>
                                     <a href="https://innmind.github.io/Immutable/BLACKBOX.html">
@@ -82,48 +96,36 @@
     </aside>
     <main><h1 id="sequence"><a href="#sequence" class="anchor">#</a><code>Sequence</code></h1>
 <p>A sequence is an ordered list of elements, think of it like an array such as <code>[1, 'a', new stdClass]</code> or a <code>list<T></code> in the <a href="http://psalm.dev/">Psalm</a> nomenclature.</p>
-<p>A sequence is always typed in order to be sure it only contains elements of the type you specified. If you try to add an element of a different type it will throw an error.</p>
 <h2 id="of"><a href="#of" class="anchor">#</a><code>::of()</code></h2>
-<p>The <code>of</code> static method allows you to create a new sequence of the given <a href="types.html">type</a>:</p>
+<p>The <code>of</code> static method allows you to create a new sequence with all the elements passed as arguments.</p>
 <pre><code class="language-php">use Innmind\Immutable\Sequence;
 
 /** @var Sequence<int> */
-$sequence = Sequence::of('int');</code></pre>
-<p>This named constructor also allows you to directly add elements when initialising the sequence:</p>
-<pre><code class="language-php">Sequence::of('int', 1, 2, 3, $etc);</code></pre>
+Sequence::of(1, 2, 3, $etc);</code></pre>
 <h2 id="defer"><a href="#defer" class="anchor">#</a><code>::defer()</code></h2>
 <p>This named constructor is for advanced use cases where you want the data of your sequence to be loaded upon use only and not initialisation.</p>
 <p>An example for such a use case is a sequence of log lines coming from a file:</p>
-<pre><code class="language-php">$sequence = Sequence::defer('string', (function() {
+<pre><code class="language-php">$sequence = Sequence::defer((function() {
     yield from readSomeFile('apache.log');
 })());</code></pre>
-<p>The method as always ask the type of the elements and a generator that will provide the elements. Once the elements are loaded they are kept in memory so you can run multiple operations on it without loading the file twice.</p>
+<p>The method ask a generator that will provide the elements. Once the elements are loaded they are kept in memory so you can run multiple operations on it without loading the file twice.</p>
 <p><strong>Important</strong>: beware of the case where the source you read the elements is not altered before the first use of the sequence.</p>
 <h2 id="lazy"><a href="#lazy" class="anchor">#</a><code>::lazy()</code></h2>
 <p>This is similar to <code>::defer()</code> with the exception that the elements are not kept in memory but reloaded upon each use.</p>
-<pre><code class="language-php">$sequence = Sequence::lazy('string', function() {
+<pre><code class="language-php">$sequence = Sequence::lazy(function() {
     yield from readSomeFile('apache.log');
 });</code></pre>
 <p><strong>Important</strong>: since the elements are reloaded each time the immutability responsability is up to you because the source may change or if you generate objects it will generate new objects each time (so if you make strict comparison it will fail).</p>
 <h2 id="mixed"><a href="#mixed" class="anchor">#</a><code>::mixed()</code></h2>
-<p>This is a shortcut for <code>::of('mixed', ...$mixed)</code>.</p>
+<p>This is a shortcut for <code>::of(mixed ...$mixed)</code>.</p>
 <h2 id="ints"><a href="#ints" class="anchor">#</a><code>::ints()</code></h2>
-<p>This is a shortcut for <code>::of('int', int ...$ints)</code>.</p>
+<p>This is a shortcut for <code>::of(int ...$ints)</code>.</p>
 <h2 id="floats"><a href="#floats" class="anchor">#</a><code>::floats()</code></h2>
-<p>This is a shortcut for <code>::of('float', float ...$floats)</code>.</p>
+<p>This is a shortcut for <code>::of(float ...$floats)</code>.</p>
 <h2 id="strings"><a href="#strings" class="anchor">#</a><code>::strings()</code></h2>
-<p>This is a shortcut for <code>::of('string', string ...$strings)</code>.</p>
+<p>This is a shortcut for <code>::of(string ...$strings)</code>.</p>
 <h2 id="objects"><a href="#objects" class="anchor">#</a><code>::objects()</code></h2>
-<p>This is a shortcut for <code>::of('object', object ...$objects)</code>.</p>
-<h2 id="isoftype"><a href="#isoftype" class="anchor">#</a><code>->isOfType()</code></h2>
-<p>This method is here to help you know the sequence is of a certain type:</p>
-<pre><code class="language-php">$sequence = Sequence::of('stdClass');
-$sequence->isOfType('int'); // false
-$sequence->isOfType('stdClass'); // true</code></pre>
-<h2 id="type"><a href="#type" class="anchor">#</a><code>->type()</code></h2>
-<p>This returns the type you specified at initialisation.</p>
-<pre><code class="language-php">$sequence = Sequence::of('stdClass');
-$sequence->type(); // 'stdClass'</code></pre>
+<p>This is a shortcut for <code>::of(object ...$objects)</code>.</p>
 <h2 id="invoke"><a href="#invoke" class="anchor">#</a><code>->__invoke()</code></h2>
 <p>Augment the sequence with a new element.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1);
@@ -141,10 +143,10 @@ $sequence->size(); // 3</code></pre>
 $sequence->count(); // 3
 \count($sequence); // 3</code></pre>
 <h2 id="get"><a href="#get" class="anchor">#</a><code>->get()</code></h2>
-<p>This method will return the element at the given index in the sequence. If the index doesn't exist it will throw an exception.</p>
+<p>This method will return a <a href="maybe.html"><code>Maybe</code></a> object containing the element at the given index in the sequence. If the index doesn't exist it will an empty <code>Maybe</code> object.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1, 4, 6);
-$sequence->get(1); // 4
-$sequence->get(3); // throws Innmind\Immutable\Exception\OutOfBoundException</code></pre>
+$sequence->get(1); // Maybe::just(4)
+$sequence->get(3); // Maybe::nothing()</code></pre>
 <h2 id="diff"><a href="#diff" class="anchor">#</a><code>->diff()</code></h2>
 <p>This method will return a new sequence containing the elements that are not present in the other sequence.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1, 4, 6)->diff(Sequence::ints(1, 3, 6));
@@ -164,17 +166,18 @@ $sequence->equals(Sequence::ints(1, 2, 3)); // true</code></pre>
 <h2 id="equals"><a href="#equals" class="anchor">#</a><code>->equals()</code></h2>
 <p>Check if two sequences are identical.</p>
 <pre><code class="language-php">Sequence::ints(1, 2)->equals(Sequence::ints(1, 2)); // true
-Sequence::ints()->equals(Sequence::strings()); // throws \TypeError</code></pre>
+Sequence::ints()->equals(Sequence::strings()); // false but psalm will raise an error</code></pre>
 <h2 id="filter"><a href="#filter" class="anchor">#</a><code>->filter()</code></h2>
 <p>Removes elements from the sequence that don't match the given predicate.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1, 2, 3, 4)->filter(fn($i) => $i % 2 === 0);
 $sequence->equals(Sequence::ints(2, 4));</code></pre>
 <h2 id="foreach"><a href="#foreach" class="anchor">#</a><code>->foreach()</code></h2>
-<p>Use this method to call a function for each element of the sequence. Since this method doesn't return anything it is the only place acceptable to create side effects.</p>
-<pre><code class="language-php">Sequence::strings('hello', 'world')->foreach(function(string $string): void {
+<p>Use this method to call a function for each element of the sequence. Since this structure is immutable it returns a <code>SideEffect</code> object, as its name suggest it is the only place acceptable to create side effects.</p>
+<pre><code class="language-php">$sideEffect = Sequence::strings('hello', 'world')->foreach(function(string $string): void {
     echo $string.' ';
 });</code></pre>
-<h2 id="group"><a href="#group" class="anchor">#</a><code>->group()</code></h2>
+<p>In itself the <code>SideEffect</code> object has no use except to avoid psalm complaining that the <code>foreach</code> method is not used.</p>
+<h2 id="groupby"><a href="#groupby" class="anchor">#</a><code>->groupBy()</code></h2>
 <p>This will create multiples sequences with elements regrouped under the same key computed by the given function.</p>
 <pre><code class="language-php">$urls = Sequence::strings(
     'http://example.com',
@@ -183,27 +186,28 @@ $sequence->equals(Sequence::ints(2, 4));</code></pre>
     'ftp://example.com',
 );
 /** @var Innmind\Immutable\Map<string, Sequence<string>> */
-$map = $urls->group(
-    'string',
-    fn(string $url): string => \parse_url($url)['scheme'],
-);
-$map->get('http')->equals(Sequence::strings('http://example.com', 'http://example.com/foo')); // true
-$map->get('https')->equals(Sequence::strings('https://example.com')); // true
-$map->get('ftp')->equals(Sequence::strings('ftp://example.com')); // true</code></pre>
-<h2 id="groupby"><a href="#groupby" class="anchor">#</a><code>->groupBy()</code></h2>
-<p>This is similar to the <code>->group()</code> method with the exception that the key type of the returned <a href="map.html"><code>Map</code></a> will be determined by the first computed key value.</p>
-<p>Since the key type is computed you cannot call <code>->groupBy()</code> on an empty sequence, otherwise it will throw <code>Innmind\Immutable\Exception\CannotGroupEmptyStructure</code>.</p>
-<pre><code class="language-php">$urls = Sequence::strings(
-    'http://example.com',
-    'http://example.com/foo',
-    'https://example.com',
-    'ftp://example.com',
-);
-/** @var Innmind\Immutable\Map<string, Sequence<string>> */
 $map = $urls->groupBy(fn(string $url): string => \parse_url($url)['scheme']);
-$map->get('http')->equals(Sequence::strings('http://example.com', 'http://example.com/foo')); // true
-$map->get('https')->equals(Sequence::strings('https://example.com')); // true
-$map->get('ftp')->equals(Sequence::strings('ftp://example.com')); // true</code></pre>
+$map
+    ->get('http')
+    ->match(
+        static fn($group) => $group,
+        static fn() => Sequence::strings(),
+    )
+    ->equals(Sequence::strings('http://example.com', 'http://example.com/foo')); // true
+$map
+    ->get('https')
+    ->match(
+        static fn($group) => $group,
+        static fn() => Sequence::strings(),
+    )
+    ->equals(Sequence::strings('https://example.com')); // true
+$map
+    ->get('ftp')
+    ->match(
+        static fn($group) => $group,
+        static fn() => Sequence::strings(),
+    )
+    ->equals(Sequence::strings('ftp://example.com')); // true</code></pre>
 <h2 id="first"><a href="#first" class="anchor">#</a><code>->first()</code></h2>
 <p>This is an alias for <code>->get(0)</code>.</p>
 <h2 id="last"><a href="#last" class="anchor">#</a><code>->last()</code></h2>
@@ -213,50 +217,54 @@ $map->get('ftp')->equals(Sequence::strings('ftp://example.com')); // true</code>
 <pre><code class="language-php">$sequence = Sequence::ints(1, 42, 3);
 $sequence->contains(2); // false
 $sequence->contains(42); // true
-$sequence->contains('42'); // throws \TypeError</code></pre>
+$sequence->contains('42'); // false but psalm will raise an error</code></pre>
 <h2 id="indexof"><a href="#indexof" class="anchor">#</a><code>->indexOf()</code></h2>
-<p>This will return the index number at which the first occurence of the element was found.</p>
+<p>This will return a <a href="maybe.html"><code>Maybe</code></a> object containing the index number at which the first occurence of the element was found.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1, 2, 3, 2);
-$sequence->indexOf(2); // 1
-$sequence->indexOf(4); // throws Innmind\Immutable\Exception\ElementNotFound</code></pre>
+$sequence->indexOf(2); // Maybe::just(1)
+$sequence->indexOf(4); // Maybe::nothing()</code></pre>
 <h2 id="indices"><a href="#indices" class="anchor">#</a><code>->indices()</code></h2>
 <p>Create a new sequence of integers representing the indices of the original sequence.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1, 2, 3);
 $sequence->indices()->equals(Sequence::ints(...\range(0, $sequence->size() - 1)));</code></pre>
 <h2 id="map"><a href="#map" class="anchor">#</a><code>->map()</code></h2>
-<p>Create a new sequence of the same type with the exact same number of elements but modified by the given function.</p>
+<p>Create a new sequence with the exact same number of elements but modified by the given function.</p>
 <pre><code class="language-php">$ints = Sequence::ints(1, 2, 3);
 $squares = $ints->map(fn($i) => $i**2);
 $squares->equals(Sequence::ints(1, 4, 9)); // true</code></pre>
-<h2 id="mapto"><a href="#mapto" class="anchor">#</a><code>->mapTo()</code></h2>
-<p>This is similar to <code>->map()</code> except you can change the type of the generated sequence.</p>
+<h2 id="flatmap"><a href="#flatmap" class="anchor">#</a><code>->flatMap()</code></h2>
+<p>This is similar to <code>->map()</code> except that instead of returning a new value it returns a new sequence for each value, and each new sequence is appended together.</p>
 <pre><code class="language-php">$ints = Sequence::ints(1, 2, 3);
-$squares = $ints->mapTo('string', fn($i) => (string) ($i**2));
-$squares->equals(Sequence::strings('1', '4', '9')); // true</code></pre>
+$squares = $ints->flatMap(fn($i) => Sequence::of($i, $i**2));
+$squares->equals(Sequence::ints(1, 1, 2, 4, 3, 9)); // true</code></pre>
 <h2 id="pad"><a href="#pad" class="anchor">#</a><code>->pad()</code></h2>
 <p>Add the same element to a new sequence in order that its size is at least the given one.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1, 2, 3);
 $sequence->pad(2, 0)->equals(Sequence::ints(1, 2, 3)); // true
 $sequence->pad(5, 0)->equals(Sequence::ints(1, 2, 3, 0, 0)); // true</code></pre>
 <h2 id="partition"><a href="#partition" class="anchor">#</a><code>->partition()</code></h2>
-<p>This method is similar to <code>->group()</code> method but the map keys are always booleans. The difference is that here the 2 keys are always present whereas with <code>->group()</code> it will depend on the original sequence.</p>
+<p>This method is similar to <code>->groupBy()</code> method but the map keys are always booleans. The difference is that here the 2 keys are always present whereas with <code>->groupBy()</code> it will depend on the original sequence.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1, 2, 3);
 /** @var Map<bool, Sequence<int>> */
 $map = $sequence->partition(fn($int) => $int % 2 === 0);
-$map->get(true)->equals(Sequence::ints(2)); // true
-$map->get(false)->equals(Sequence::ints(1, 3)); // true</code></pre>
+$map
+    ->get(true)
+    ->match(
+        static fn($partition) => $partition,
+        static fn() => Sequence::ints(),
+    )
+    ->equals(Sequence::ints(2)); // true
+$map
+    ->get(false)
+    ->match(
+        static fn($partition) => $partition,
+        static fn() => Sequence::ints(),
+    )
+    ->equals(Sequence::ints(1, 3)); // true</code></pre>
 <h2 id="slice"><a href="#slice" class="anchor">#</a><code>->slice()</code></h2>
 <p>Return a new sequence with only the elements that were between the given indices. (The upper bound is not included)</p>
 <pre><code class="language-php">$sequence = Sequence::ints(4, 3, 2, 1);
 $sequence->slice(1, 4)->equals(Sequence::ints(3, 2)); // true</code></pre>
-<h2 id="splitat"><a href="#splitat" class="anchor">#</a><code>->splitAt()</code></h2>
-<p>Create a new sequence of 2 sequences split at the given index.</p>
-<pre><code class="language-php">$sequence = Sequence::ints(4, 3, 1, 0);
-/** @var Sequence<Sequence<int>> */
-$splits = $sequence->splitAt(2);
-$splits->size(); // 2
-$splits->get(0)->equals(Sequence::ints(4, 3)); // true
-$splits->get(1)->equals(Sequence::ints(1, 0)); // true</code></pre>
 <h2 id="take"><a href="#take" class="anchor">#</a><code>->take()</code></h2>
 <p>Create a new sequence with only the given number of elements from the start of the sequence.</p>
 <pre><code class="language-php">Sequence::ints(4, 3, 1, 0)->take(2)->equals(Sequence::ints(4, 3)); // true</code></pre>
@@ -282,7 +290,7 @@ $sequence->equals(Sequence::ints(1, 2, 3, 4));</code></pre>
 $sum = $sequence->reduce(0, fn($sum, $int) => $sum + $int);
 $sum; // 10</code></pre>
 <h2 id="clear"><a href="#clear" class="anchor">#</a><code>->clear()</code></h2>
-<p>Create an empty new sequence of the same type.</p>
+<p>Create an empty new sequence of the same type. (To avoid to redeclare the types manually in a docblock)</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1);
 $sequence->clear()->size(); // 0</code></pre>
 <h2 id="reverse"><a href="#reverse" class="anchor">#</a><code>->reverse()</code></h2>
@@ -293,46 +301,14 @@ $sequence->reverse()->equals(Sequence::ints(4, 3, 2, 1));</code></pre>
 <p>Tells whether there is at least one element or not.</p>
 <pre><code class="language-php">Sequence::ints()->empty(); // true
 Sequence::ints(1)->empty(); // false</code></pre>
-<h2 id="tosequenceof"><a href="#tosequenceof" class="anchor">#</a><code>->toSequenceOf()</code></h2>
-<p>This is similar to <code>->mapTo()</code> but you can yield multiple values for one original element.</p>
-<pre><code class="language-php">$sequence = Sequence::ints(1, 2, 3)->toSequenceOf(
-    'int|string',
-    function(int $int) {
-        yield $int;
-        yield (string) $int;
-    },
-);
-$sequence->equals(Sequence::of('int|string', 1, '1', 2, '2', 3, '3')); // true</code></pre>
-<h2 id="tosetof"><a href="#tosetof" class="anchor">#</a><code>->toSetOf()</code></h2>
-<p>Similar to <code>->toSequenceOf()</code> but it returns a <a href="set.html"><code>Set</code></a> instead.</p>
-<pre><code class="language-php">$set = Sequence::ints(1, 2, 3)->toSetOf(
-    'int|string',
-    function(int $int) {
-        yield $int;
-        yield (string) $int;
-    },
-);
-$set->equals(Set::of('int|string', 1, '1', 2, '2', 3, '3')); // true</code></pre>
-<h2 id="tomapof"><a href="#tomapof" class="anchor">#</a><code>->toMapOf()</code></h2>
-<p>Similar to <code>->toSequenceOf()</code> but it returns a <a href="map.html"><code>Map</code></a> instead.</p>
-<pre><code class="language-php">$map = Sequence::ints(1, 2, 3)->toMapOf(
-    'string',
-    'int',
-    function(int $int) {
-        yield (string) $int => $int;
-    },
-);
-$map->equals(
-    Map::of('string', 'int')
-        ('1', 1)
-        ('2', 2)
-        ('3', 3)
-); // true</code></pre>
+<h2 id="tolist"><a href="#tolist" class="anchor">#</a><code>->toList()</code></h2>
+<p>It returns a new <code>array</code> containing all the elements of the sequence.</p>
 <h2 id="find"><a href="#find" class="anchor">#</a><code>->find()</code></h2>
-<p>Returns the first element that matches the predicate.</p>
+<p>Returns a <a href="maybe.html"><code>Maybe</code></a> object containing the first element that matches the predicate.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(2, 4, 6, 8, 9, 10, 11);
 $firstOdd = $sequence->find(fn($i) => $i % 2 === 1);
-$firstOdd; // 9</code></pre>
+$firstOdd; // Maybe::just(9)
+$sequence->find(static fn() => false); // Maybe::nothing()</code></pre>
 <h2 id="matches"><a href="#matches" class="anchor">#</a><code>->matches()</code></h2>
 <p>Check if all the elements of the sequence matches the given predicate.</p>
 <pre><code class="language-php">$isOdd = fn($i) => $i % 2 === 1;

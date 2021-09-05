@@ -64,9 +64,23 @@
                     </details>
                             </li>
                     <li>
-                                    <a href="https://innmind.github.io/Immutable/TYPES.html">
-                        Types
-                    </a>
+                                    <details open>
+                        <summary>
+                                                            Use cases
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/LAZY_FILE.html">
+                                        How to read a file
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/PARSING.html">
+                                        Parsing strings
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
                             </li>
                     <li>
                                     <a href="https://innmind.github.io/Immutable/BLACKBOX.html">
@@ -96,7 +110,7 @@ Str::of('👋')->length(); // 4</code></pre>
 <p>This will return the encapsulated string.</p>
 <pre><code class="language-php">Str::of('whataver')->toString(); // 'whatever'</code></pre>
 <h2 id="encoding"><a href="#encoding" class="anchor">#</a><code>->encoding()</code></h2>
-<p>This will return the encoding use to manipulate the string.</p>
+<p>This will return the encoding used to manipulate the string.</p>
 <pre><code class="language-php">Str::of('', 'UTF-8')->encoding()->equals(Str::of('UTF-8')); // true</code></pre>
 <h2 id="toencoding"><a href="#toencoding" class="anchor">#</a><code>->toEncoding()</code></h2>
 <p>Use this method to change the encoding used to manipulate the string.</p>
@@ -104,13 +118,11 @@ Str::of('👋')->length(); // 4</code></pre>
 <h2 id="split"><a href="#split" class="anchor">#</a><code>->split()</code></h2>
 <p>Use this method to split a string into a <a href="sequence.html"><code>Sequence</code></a> of smaller strings.</p>
 <pre><code class="language-php">Str::of('foo')->split()->equals(Sequence::of(
-    Str::class,
     Str::of('f'),
     Str::of('o'),
     Str::of('o'),
 ));
 Str::of('foo|bar')->split('|')->equals(Sequence::of(
-    Str::class,
     Str::of('foo'),
     Str::of('bar'),
 ));</code></pre>
@@ -124,15 +136,11 @@ Str::of('foo|bar')->split('|')->equals(Sequence::of(
 ));</code></pre>
 <h2 id="position"><a href="#position" class="anchor">#</a><code>->position()</code></h2>
 <p>Returns the position of the searched string in the original string.</p>
-<pre><code class="language-php">Str::of('foobar')->position('ob'); // 2
-Str::of('foobar')->position('unknown'); // throws Innmind\Immutable\Exception\SubstringException</code></pre>
+<pre><code class="language-php">Str::of('foobar')->position('ob'); // Maybe::just(2)
+Str::of('foobar')->position('unknown'); // Maybe::nothing()</code></pre>
 <h2 id="replace"><a href="#replace" class="anchor">#</a><code>->replace()</code></h2>
 <p>Replace the searched string by its replacement.</p>
 <pre><code class="language-php">Str::of('foobar')->replace('ob', 'bo')->equals(Str::of('foboar')); // true</code></pre>
-<h2 id="str"><a href="#str" class="anchor">#</a><code>->str()</code></h2>
-<p>Returns the string following the given delimiter.</p>
-<pre><code class="language-php">Str::of('foobar')->str('b')->equals(Str::of('bar')); // true
-Str::of('foobar')->str('unknown'); // throws Innmind\Immutable\Exception\SubstringException</code></pre>
 <h2 id="toupper"><a href="#toupper" class="anchor">#</a><code>->toUpper()</code></h2>
 <p>Return the string in upper case.</p>
 <pre><code class="language-php">Str::of('foobar')->toUpper()->equals(Str::of('FOOBAR'));</code></pre>
@@ -163,33 +171,32 @@ Str::of('Alien')->rightPad(3, '_')->equals(Str::of('Alien'));</code></pre>
 <pre><code class="language-php">Str::of('Alien')->leftPad(10)->equals(Str::of('     Alien'));
 Str::of('Alien')->leftPad(10, '_')->equals(Str::of('_____Alien'));
 Str::of('Alien')->leftPad(3, '_')->equals(Str::of('Alien'));</code></pre>
-<h2 id="rightpad"><a href="#rightpad" class="anchor">#</a><code>->rightPad()</code></h2>
+<h2 id="unipad"><a href="#unipad" class="anchor">#</a><code>->uniPad()</code></h2>
 <p>Add the given string to both sides of the string in order of the new string to be at least of the given size.</p>
 <pre><code class="language-php">Str::of('Alien')->uniPad(10,)->equals(Str::of('  Alien   '));
 Str::of('Alien')->uniPad(10, '_')->equals(Str::of('__Alien___'));</code></pre>
 <h2 id="repeat"><a href="#repeat" class="anchor">#</a><code>->repeat()</code></h2>
 <p>Repeat the original string the number of given times.</p>
 <pre><code class="language-php">Str::of('foo')->repeat(3)->equals(Str::of('foofoofoo'));</code></pre>
-<h2 id="shuffle"><a href="#shuffle" class="anchor">#</a><code>->shuffle()</code></h2>
-<p>Randomly reorder the string.</p>
-<pre><code class="language-php">Str::of('foobar')->shuffle()->equals(Str::of('obaofr')); // maybe true</code></pre>
 <h2 id="stripslashes"><a href="#stripslashes" class="anchor">#</a><code>->stripSlashes()</code></h2>
 <p>Same behaviour as the native <code>stripslashes</code> function.</p>
+<h2 id="stripcslashes"><a href="#stripcslashes" class="anchor">#</a><code>->stripCSlashes()</code></h2>
+<p>Same behaviour as the native <code>stripcslashes</code> function.</p>
 <h2 id="wordcount"><a href="#wordcount" class="anchor">#</a><code>->wordCount()</code></h2>
 <p>Counts the number in the string.</p>
 <pre><code class="language-php">Str::of('foo bar')->wordCount(); // 2</code></pre>
 <h2 id="words"><a href="#words" class="anchor">#</a><code>->words()</code></h2>
 <p>The list of words with their position.</p>
 <pre><code class="language-php">Str::of('foo bar')->words()->equals(
-    Map::of('int', Str::class)
-        (0, Str::of('foo'))
-        (4, Str::of('bar')),
+    Map::of(
+        [0, Str::of('foo')],
+        [4, Str::of('bar')],
+    ),
 );</code></pre>
 <h2 id="pregsplit"><a href="#pregsplit" class="anchor">#</a><code>->pregSplit()</code></h2>
 <p>Split the string using a regular expression.</p>
 <pre><code class="language-php">Str::of('hypertext language, programming')->pregSplit('/[\s,]+/')->equals(
     Sequence::of(
-        Str::class,
         Str::of('hypertext'),
         Str::of('language'),
         Str::of('programming'),
@@ -202,10 +209,11 @@ Str::of('abcdef')->matches('/^b/'); // false</code></pre>
 <h2 id="capture"><a href="#capture" class="anchor">#</a><code>->capture</code></h2>
 <p>Return a map of the elements matching the regular expression.</p>
 <pre><code class="language-php">Str::of('http://www.php.net/index.html')->capture('@^(?:http://)?(?P<host>[^/]+)@i')->equals(
-    Map::of('scalar', Str::class)
-        (0, Str::of('http://www.php.net'))
-        (1, Str::of('www.php.net'))
-        ('host', Str::of('www.php.net')),
+    Map::of(
+        [0, Str::of('http://www.php.net')],
+        [1, Str::of('www.php.net')],
+        ['host', Str::of('www.php.net')],
+    ),
 );</code></pre>
 <h2 id="pregreplace"><a href="#pregreplace" class="anchor">#</a><code>->pregReplace()</code></h2>
 <p>Replace part of the string by using a regular expression.</p>
@@ -237,7 +245,6 @@ Str::of('foobar')->substring(3, 1)->equals(Str::of('b')); // true</code></pre>
 <h2 id="camelize"><a href="#camelize" class="anchor">#</a><code>->camelize()</code></h2>
 <p>Return a CamelCase representation of the string.</p>
 <pre><code class="language-php">Str::of('foo bar_baz')->camelize()->equals(Str::of('fooBarBaz'));</code></pre>
-<p><strong>Note</strong>: this function doesn't provide a true CamelCase as the first letter is lower cased. This will stay this way until the next major release to prevent breaking existing code relying on this bug.</p>
 <h2 id="append"><a href="#append" class="anchor">#</a><code>->append()</code></h2>
 <p>Append a string at the end of the current one.</p>
 <pre><code class="language-php">Str::of('foo')->append('bar')->equals(Str::of('foobar')); // true</code></pre>
@@ -263,7 +270,24 @@ Str::of('foobar')->startsWith('bar'); // false</code></pre>
 <h2 id="endswith"><a href="#endswith" class="anchor">#</a><code>->endsWith()</code></h2>
 <p>Check if the current string ends with the given string.</p>
 <pre><code class="language-php">Str::of('foobar')->endsWith('bar'); // true
-Str::of('foobar')->endsWith('foo'); // false</code></pre></main>
+Str::of('foobar')->endsWith('foo'); // false</code></pre>
+<h2 id="join"><a href="#join" class="anchor">#</a><code>->join()</code></h2>
+<p>This method will create a new <code>Str</code> object with all the values from the set/sequence separated by the vlue of the original string.</p>
+<pre><code class="language-php">Str::of('|')
+    ->join(Sequence::of('foo', 'bar', 'baz'))
+    ->equals(Str::of('foo|bar|baz')); // true</code></pre>
+<h2 id="map"><a href="#map" class="anchor">#</a><code>->map()</code></h2>
+<p>This function will create a new <code>Str</code> object with the value modified by the given function.</p>
+<pre><code class="language-php">$str = Str::of('foo|bar|baz')->map(
+    fn(string $value, string $encoding): string => \implode(',', \explode('|', $string)),
+);
+$str->equals(Str::of('foo,bar,baz')); // true</code></pre>
+<h2 id="flatmap"><a href="#flatmap" class="anchor">#</a><code>->flatMap()</code></h2>
+<p>This is similar to <code>->map()</code> but instead of the function returning a value it must return a new <code>Str</code> object.</p>
+<pre><code class="language-php">$str = Str::of('foo|bar|baz')->flatMap(
+    fn(string $value, string $encoding): Str => Str::of(',')->join(Sequence::of(...\explode('|', $string))),
+);
+$str->equals(Str::of('foo,bar,baz')); // true</code></pre></main>
     <footer>
         <a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
     </footer>
