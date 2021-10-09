@@ -60,7 +60,7 @@
                                         Either
                                     </a>
                                 </li>
-                                                            <li class="sub-item ">
+                                                            <li class="sub-item current">
                                     <a href="https://innmind.github.io/Immutable/STATE.html">
                                         State
                                     </a>
@@ -74,7 +74,7 @@
                                                             Use cases
                                                     </summary>
                         <ul>
-                                                            <li class="sub-item current">
+                                                            <li class="sub-item ">
                                     <a href="https://innmind.github.io/Immutable/LAZY_FILE.html">
                                         How to read a file
                                     </a>
@@ -99,62 +99,76 @@
                             </li>
                 </ul>
     </aside>
-    <main><h1 id="how-to-read-a-file"><a href="#how-to-read-a-file" class="anchor">#</a>How to read a file</h1>
-<p>This example below will show you how to build complex pipelines to read files without ever loading the whole file in memory, allowing you to read any file's size.</p>
-<p>This example below looks for a user in a csv file with a score above <code>100</code>.</p>
+    <main><h1 id="state"><a href="#state" class="anchor">#</a><code>State</code></h1>
+<p>The <code>State</code> monad allows you to build a set of pure steps to compute a new state. Since the initial state is given when all the steps are built it means that all steps are lazy, this use function composition (so everything is kept in memory).</p>
+<p>The state and value can be of any type.</p>
+<h2 id="of"><a href="#of" class="anchor">#</a><code>::of()</code></h2>
 <pre><code class="language-php">use Innmind\Immutable\{
-    Sequence,
-    Str,
+    State,
+    State\Result,
 };
 
-$lines = Sequence::lazy(function(callable $registerCleanup) {
-    $handle = \fopen('users.csv', 'r');
-    $registerCleanup(fn() => \fclose($handle));
+/** @var State<array, int> */
+$state = State::of(function(array $logs) {
+    return Result::of($logs, 0);
+});</code></pre>
+<h2 id="map"><a href="#map" class="anchor">#</a><code>->map()</code></h2>
+<p>This method will modify the value without affecting the currently held state.</p>
+<pre><code class="language-php">use Innmind\Immutable\{
+    State,
+    State\Result,
+};
 
-    while (!\feof($handle)) {
-        yield (string) \fgets($handle);
-    }
-
-    \fclose($handle);
+/** @var State<array, int> */
+$state = State::of(function(array $logs) {
+    return Result::of($logs, 0);
 });
-/** @var Maybe<User> */
-$user = $lines
-    ->map(fn(string $line) => Str::of($line))
-    ->map(fn(Str $line) => $line->trim())
-    ->filter(fn(Str $line) => !$line->empty())
-    ->filter(fn(Str $line) => $line->contains(','))
-    ->map(fn(Str $line) => $line->split(','))
-    ->map(fn(Sequence $columns) => User::of($columns)) // ficticious class
-    ->find(fn(User $user) => $user->score() > 100);</code></pre>
-<p>The final <code>$user</code> variable is an instance of <code>Maybe</code> because the user may or may not exist.</p>
-<p>If a user is found before the end of the file the sequence will stop reading the file and call the function passed to <code>$registerCleanup</code> allowing you to close the file handle properly.</p>
-<p>Since this is a lazy sequence the file is iterated over only when trying to extract a concrete value, in this case via <code>->find()</code>. This means that even though the pipeline contains multiple steps the file is read only once. This decoupling between reading the file and building a pipeline to compute a value allows you to split the construction of the pipeline across multiple layers in your application without worrying about performance.</p>
-<p>The other advantage of this technique is that it allows to read files that may not fit in memory.</p>
-<h2 id="merging-multiple-files-in-a-single-pipeline"><a href="#merging-multiple-files-in-a-single-pipeline" class="anchor">#</a>Merging multiple files in a single pipeline</h2>
-<p>The lazyness described above still works when you combine multiple lazy sequences.</p>
-<pre><code class="language-php">$openFile = fn(string $name) => function(callable $registerCleanup) use ($name) {
-    $handle = \fopen($name, 'r');
-    $registerCleanup(fn() => \fclose($handle));
 
-    while (!\feof($handle)) {
-        yield (string) \fgets($handle);
-    }
-
-    \fclose($handle);
+$state = $state->map(fn($value) => $value + 1);</code></pre>
+<h2 id="flatmap"><a href="#flatmap" class="anchor">#</a><code>->flatMap()</code></h2>
+<p>This method allows you to modify both state and values.</p>
+<pre><code class="language-php">use Innmind\Immutable\{
+    State,
+    State\Result,
 };
 
-$users = Sequence::lazy($openFile('users1.csv'))
-    ->append(Sequence::lazy($openFile('users2.csv')))
-    ->append(Sequence::lazy($openFile('users3.csv')));
+/** @var State<array, int> */
+$state = State::of(function(array $logs) {
+    return Result::of($logs, 0);
+});
 
-/** @var callable(Sequence<string>): Maybe<User> $findUser */
-$findUser = function(Sequence $users): Maybe {
-    // todo build a pipeline to find a user
+$state = $state->flatMap(fn($value) => State::of(function(array $logs) use ($value) {
+    $value++;
+
+    return Result::of(
+        \array_merge($logs, "The new value is $value"),
+        $value,
+    );
+}));</code></pre>
+<h2 id="run"><a href="#run" class="anchor">#</a><code>->run()</code></h2>
+<p>This is the only place where you can run the steps to compute the new state.</p>
+<pre><code class="language-php">use Innmind\Immutable\{
+    State,
+    State\Result,
 };
 
-$user = $findUser($users);</code></pre>
-<p>Here we create a sequence that will sequentially read the 3 files <code>users1.csv</code>, <code>users2.csv</code> and <code>users3.csv</code> but the <code>$findUser</code> function is not aware of where the data comes from. This composition will open <code>users2.csv</code> only if the user is not found in <code>users1.csv</code>.</p>
-<p>In this example the 3 sources are all files but you could mix the sources with different generators, for example you could combine from a file with another one coming from a database.</p></main>
+/** @var State<array, int> */
+$result = State::of(function(array $logs) {
+    return Result::of($logs, 0);
+})
+    ->map(fn($value) => $value + 1)
+    ->flatMap(fn($value) => State::of(function(array $logs) use ($value) {
+        $value++;
+
+        return Result::of(
+            \array_merge($logs, "The new value is $value"),
+            $value,
+        );
+    }))
+    ->run([]);
+
+$result->state(); // ['The new value is 2']
+$result->value(); // 2</code></pre></main>
     <footer>
         <a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
     </footer>
