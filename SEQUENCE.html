@@ -330,7 +330,7 @@ Sequence::ints(2, 4, 6, 8)->any($isOdd); // false</code></pre>
 <pre><code class="language-php">function sum(Sequence $ints): int
 {
     return $ints->match(
-        fn(int $head, Sequence $tail) => $head + $sum($tail),
+        fn(int $head, Sequence $tail) => $head + sum($tail),
         fn() => 0,
     );
 }
