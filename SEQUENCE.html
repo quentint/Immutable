@@ -65,6 +65,11 @@
                                         State
                                     </a>
                                 </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://innmind.github.io/Immutable/MONOIDS.html">
+                                        Monoids
+                                    </a>
+                                </li>
                                                     </ul>
                     </details>
                             </li>
@@ -289,6 +294,15 @@ $sequence->equals(Sequence::ints(2, 3)); // true</code></pre>
 <pre><code class="language-php">$sequence = Sequence::ints(4, 2, 3, 1);
 $sequence = $sequence->sort(fn($a, $b) => $a <=> $b);
 $sequence->equals(Sequence::ints(1, 2, 3, 4));</code></pre>
+<h2 id="fold"><a href="#fold" class="anchor">#</a><code>->fold()</code></h2>
+<p>This is similar to the <code>reduce</code> method but only takes a <a href="MONOIDS.html"><code>Monoid</code></a> as an argument.</p>
+<pre><code class="language-php">use Innmind\Immutable\Monoid\Concat;
+
+$lines = Sequence::of("foo\n", "bar\n", 'baz')
+    ->map(fn($line) => Str::of($line))
+    ->fold(new Concat);
+
+$lines->equals("foo\nbar\nbaz"); // true</code></pre>
 <h2 id="reduce"><a href="#reduce" class="anchor">#</a><code>->reduce()</code></h2>
 <p>Iteratively compute a value for all the elements in the sequence.</p>
 <pre><code class="language-php">$sequence = Sequence::ints(1, 2, 3, 4);
