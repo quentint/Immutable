@@ -113,9 +113,9 @@
 $str = Str::of('whatever');
 $str instanceof Str; // true</code></pre>
 <p>You can also specify the encoding to use for manupilating the string.</p>
-<pre><code class="language-php">$str = Str::of('ð', 'UTF-8');
+<pre><code class="language-php">$str = Str::of('👋', 'UTF-8');
 $str->length(); // 1
-Str::of('ð')->length(); // 4</code></pre>
+Str::of('👋')->length(); // 4</code></pre>
 <h2 id="tostring"><a href="#tostring" class="anchor">#</a><code>->toString()</code></h2>
 <p>This will return the encapsulated string.</p>
 <pre><code class="language-php">Str::of('whataver')->toString(); // 'whatever'</code></pre>
@@ -124,7 +124,7 @@ Str::of('ð')->length(); // 4</code></pre>
 <pre><code class="language-php">Str::of('', 'UTF-8')->encoding()->equals(Str::of('UTF-8')); // true</code></pre>
 <h2 id="toencoding"><a href="#toencoding" class="anchor">#</a><code>->toEncoding()</code></h2>
 <p>Use this method to change the encoding used to manipulate the string.</p>
-<pre><code class="language-php">Str::of('ð')->toEncoding('UTF-8');</code></pre>
+<pre><code class="language-php">Str::of('👋')->toEncoding('UTF-8');</code></pre>
 <h2 id="split"><a href="#split" class="anchor">#</a><code>->split()</code></h2>
 <p>Use this method to split a string into a <a href="sequence.html"><code>Sequence</code></a> of smaller strings.</p>
 <pre><code class="language-php">Str::of('foo')->split()->equals(Sequence::of(
@@ -159,8 +159,8 @@ Str::of('foobar')->position('unknown'); // Maybe::nothing()</code></pre>
 <pre><code class="language-php">Str::of('FOOBAR')->toUpper()->equals(Str::of('foobar'));</code></pre>
 <h2 id="length"><a href="#length" class="anchor">#</a><code>->length()</code></h2>
 <p>Returns the length of the string depending on the used encoding.</p>
-<pre><code class="language-php">Str::of('ð', 'UTF-8')->length(); // 1
-Str::of('ð')->length(); // 4</code></pre>
+<pre><code class="language-php">Str::of('👋', 'UTF-8')->length(); // 1
+Str::of('👋')->length(); // 4</code></pre>
 <h2 id="empty"><a href="#empty" class="anchor">#</a><code>->empty()</code></h2>
 <p>Check if the string is an empty string.</p>
 <pre><code class="language-php">Str::of('')->empty(); // true

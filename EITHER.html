@@ -193,7 +193,17 @@ $either = identify($request)
 <p>This is similar to the <code>->map()</code> function but will be applied on the left value only.</p>
 <pre><code class="language-php">/** @var Either<ErrorResponse, User> */
 $either = identify($request)
-    ->leftMap(fn(Error $error) => new ErrorResponse($error));</code></pre></main>
+    ->leftMap(fn(Error $error) => new ErrorResponse($error));</code></pre>
+<h2 id="maybe"><a href="#maybe" class="anchor">#</a><code>->maybe()</code></h2>
+<p>This returns a <a href="MAYBE.html"><code>Maybe</code></a> containing the right value, in case of a left value it returns a <code>Maybe</code> with nothing inside.</p>
+<pre><code class="language-php">Either::right('something')->maybe()->match(
+    static fn($value) => $value,
+    static fn() => null,
+); // returns 'something'
+Either::left('something')->maybe()->match(
+    static fn($value) => $value,
+    static fn() => null,
+); // returns null</code></pre></main>
     <footer>
         <a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
     </footer>
