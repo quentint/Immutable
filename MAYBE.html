@@ -177,7 +177,20 @@ $dsn = env('DATABASE_LOGGER_DSN')
 <pre><code class="language-php">$dsn = env('LOGGER_DSN');
 /** @var Maybe<string> */
 $validDsn = $dsn->filter(fn(string $url): bool => \filter_var($url, \FILTER_VALIDATE_URL));</code></pre>
-<p><code>$validDsn</code> will contain either a valid url or nothing.</p></main>
+<p><code>$validDsn</code> will contain either a valid url or nothing.</p>
+<h2 id="either"><a href="#either" class="anchor">#</a><code>->either()</code></h2>
+<p>This returns an <a href="EITHER.html"><code>Either</code></a> containing the value on the right side and <code>null</code> on the left side.</p>
+<pre><code class="language-php">Maybe::just('something')->either()->match(
+    static fn($right) => $right,
+    static fn() => null,
+); // returns 'something'
+Maybe::nothing()
+    ->either()
+    ->leftMap(static fn() => 'something')
+    ->match(
+        static fn() => null,
+        static fn($left) => $left,
+    ); // return 'something'</code></pre></main>
     <footer>
         <a href="https://github.com/innmind/Immutable/" target="_blank">GitHub</a>
     </footer>
